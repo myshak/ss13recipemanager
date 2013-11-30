@@ -238,7 +238,6 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
             reagent_table->setItem(reagent_table->rowCount()-1, 0, newItem);
         }
     }
-    reagent_table->resizeRowsToContents();
 
     if(reagent_table->rowCount() > 0) {
         layout->addWidget(reagent_table);
