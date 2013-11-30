@@ -9,8 +9,10 @@
 #include <QTableWidget>
 #include <QMessageBox>
 #include <QFormLayout>
+#include <QVBoxLayout>
 #include <QTranslator>
 #include <QFileDialog>
+#include <QScrollArea>
 #include <QPair>
 
 static QMap<MainWindow::ReactionStepTypes, QColor> init_StepColors() {
@@ -105,6 +107,13 @@ void MainWindow::load_recipelist(QString filename)
                     map[QString::fromStdString(m_it->first.as<std::string>())] = QString::fromStdString(m_it->second.as<std::string>());
                 }
                 r.properties[QString::fromStdString(it->first.as<std::string>())] = map;
+            } else if(it->second.IsSequence()){
+                QList<QVariant> sequence;
+                for(YAML::const_iterator m_it=it->second.begin();m_it!=it->second.end();++m_it) {
+                    YAML::Node sequence_entry = *m_it;
+                    sequence.append(QString::fromStdString(sequence_entry.as<std::string>()));
+                }
+                r.properties[QString::fromStdString(it->first.as<std::string>())] = sequence;
             } else {
                 r.properties[QString::fromStdString(it->first.as<std::string>())] = QString::fromStdString(it->second.as<std::string>());
             }
@@ -173,6 +182,73 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     }
 
     layout->setRowStretch(layout->rowCount(),100);
+    w->setLayout(layout);
+
+    return w;
+}
+
+QWidget* MainWindow::create_sources_tab(const Reagent *reagent)
+{
+    QWidget* w = new QWidget();
+    QGridLayout* layout = new QGridLayout(w);
+    QScrollArea* scroll_area = new QScrollArea(w);
+    QGridLayout* scrollarea_layout = new QGridLayout(scroll_area);
+
+    scroll_area->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    layout->addWidget(scroll_area);
+
+    for(auto &i: reagent->properties["sources"].toList()) {
+        QLabel *newSource = new QLabel(i.toString());
+        newSource->setWordWrap(true);
+        newSource->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
+        newSource->setAlignment(Qt::AlignTop);
+
+        scrollarea_layout->addWidget(newSource);
+    }
+
+    scrollarea_layout->setRowStretch(layout->rowCount(),100);
+    scroll_area->setLayout(scrollarea_layout);
+    w->setLayout(layout);
+
+    return w;
+}
+
+QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
+{
+    QWidget* w = new QWidget();
+    QGridLayout* layout = new QGridLayout(w);
+    QTableWidget* reagent_table = new QTableWidget(0,1,w);
+
+    reagent_table->setHorizontalHeaderLabels({tr("Ingredient")});
+    reagent_table->verticalHeader()->setVisible(false);
+    reagent_table->horizontalHeader()->setStretchLastSection(true);
+    reagent_table->setShowGrid(false);
+    reagent_table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    reagent_table->setSelectionMode(QAbstractItemView::SingleSelection);
+    reagent_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    reagent_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    connect(reagent_table, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(ingredientlist_selection_doubleclicked(int,int)));
+
+
+    for(auto &i: reagents) {
+        if(i.ingredients.contains(reagent->name)) {
+            QTableWidgetItem *newItem = new QTableWidgetItem(i.name);
+            reagent_table->insertRow(reagent_table->rowCount());
+            reagent_table->setItem(reagent_table->rowCount()-1, 0, newItem);
+        }
+    }
+    reagent_table->resizeRowsToContents();
+
+    if(reagent_table->rowCount() > 0) {
+        layout->addWidget(reagent_table);
+    } else {
+        reagent_table->deleteLater();
+        QLabel *l = new QLabel(tr("No uses found."));
+        l->setAlignment(Qt::AlignCenter);
+        layout->addWidget(l);
+    }
+
     w->setLayout(layout);
 
     return w;
@@ -324,6 +400,14 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected, c
         QWidget* w=create_info_tab(r);
         ui->tabWidget->addTab(w, tr("Information"));
     }
+
+    if(r->properties.contains("sources")) {
+        QWidget* w=create_sources_tab(r);
+        ui->tabWidget->addTab(w, tr("Sources"));
+    }
+
+    QWidget* usedin=create_usedin_tab(r);
+    ui->tabWidget->addTab(usedin, tr("Used in"));
 }
 
 void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)

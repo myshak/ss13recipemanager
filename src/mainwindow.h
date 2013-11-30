@@ -75,10 +75,13 @@ private:
     QList<RecipeList> recipeLists;
     QList<Reagent> reagents;
 
+    QList<ReactionStep>  gather_reactions(Reagent reagent, int level=0);
+
     QWidget *create_ingredient_tab(const Reagent *reagent);
     QWidget *create_info_tab(const Reagent *reagent);
     QWidget *create_directions_tab(const Reagent *reagent);
-    QList<ReactionStep>  gather_reactions(Reagent reagent, int level=0);
+    QWidget *create_usedin_tab(const Reagent *reagent);
+    QWidget *create_sources_tab(const Reagent *reagent);
 };
 
 #endif // MAINWINDOW_H
