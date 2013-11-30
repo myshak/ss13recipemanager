@@ -99,7 +99,7 @@ void MainWindow::load_recipelist(QString filename)
                 continue;
 
             if(it->second.IsMap()) {
-                QHash<QString, QVariant> map;
+                QMap<QString, QVariant> map;
                 for(YAML::const_iterator m_it=it->second.begin();m_it!=it->second.end();++m_it) {
                     map[QString::fromStdString(m_it->first.as<std::string>())] = QString::fromStdString(m_it->second.as<std::string>());
                 }
@@ -115,6 +115,7 @@ void MainWindow::load_recipelist(QString filename)
         item->setData(QVariant::fromValue(&(reagents.last())), Qt::UserRole+1);
         recipelist_model->appendRow(item);
     }
+    recipelist_model->sort(0);
 }
 
 void MainWindow::load_saved_recipelists()
@@ -162,6 +163,14 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
         layout->addWidget(l);
     }
 
+    if(reagent->properties.contains("reaction_message")) {
+        QLabel* l = new QLabel(tr("Reaction message:\n%0").arg(reagent->properties["reaction_message"].toString()));
+        l->setWordWrap(true);
+        l->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
+        l->setAlignment(Qt::AlignTop);
+        layout->addWidget(l);
+    }
+
     layout->setRowStretch(layout->rowCount(),100);
     w->setLayout(layout);
 
@@ -194,6 +203,9 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(QString reagent, in
     }
 
     if(r) {
+        if(r->properties.contains("heat_to")) {
+            reagents_list.append({{tr("Heat to %0").arg(r->properties["heat_to"].toString()), MainWindow::ReactionStepTypes::StepInstruction}, level+1});
+        }
         if(r->ingredients.isEmpty()) {
             reagents_list.append({{reagent,MainWindow::ReactionStepTypes::StepReagent}, level});
         } else {
@@ -201,9 +213,6 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(QString reagent, in
                 reagents_list.append(gather_reactions(i, level+1));
             }
             reagents_list.append({{tr("Makes: %0").arg(reagent), MainWindow::ReactionStepTypes::StepIntermediateResult}, level+1});
-        }
-        if(r->properties.contains("heat_to")) {
-            reagents_list.append({{tr("Heat to %0").arg(r->properties["heat_to"].toString()), MainWindow::ReactionStepTypes::StepInstruction}, level});
         }
     } else {
         reagents_list.append({{reagent,MainWindow::ReactionStepTypes::StepReagent}, level});
@@ -234,7 +243,7 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
     qStableSort(reaction_list.begin(),reaction_list.end(), ReactionListLessThan);
 
     for(auto &i: reaction_list) {
-        QTableWidgetItem *newItem = new QTableWidgetItem(QString(i.second*3, ' ') + i.first.first);
+        QTableWidgetItem *newItem = new QTableWidgetItem(QString((i.second-1)*3, ' ') + i.first.first);
         newItem->setBackgroundColor(StepColors[i.first.second]);
         directions_table->insertRow(directions_table->rowCount());
         directions_table->setItem(directions_table->rowCount()-1, 0, newItem);
@@ -253,7 +262,7 @@ QWidget *MainWindow::create_info_tab(const Reagent *reagent)
     layout->setRowWrapPolicy(QFormLayout::WrapLongRows);
     layout->setHorizontalSpacing(20);
 
-    QHash<QString, QVariant> info = reagent->properties["info"].toHash();
+    QMap<QString, QVariant> info = reagent->properties["info"].toMap();
     for(auto it = info.constBegin(); it != info.constEnd(); ++it) {
         QLabel *l = new QLabel(it.value().toString());
         l->setWordWrap(true);
@@ -346,9 +355,9 @@ void MainWindow::on_actionAdd_recipe_list_triggered()
 {
     QString file = QFileDialog::getOpenFileName(this, tr("Add recipe list"));
     if(!file.isEmpty()) {
+        settings_changed = true;
         load_recipelist(file);
     }
-    settings_changed = true;
 }
 
 void MainWindow::on_recipelists_selector_currentIndexChanged(int index)
