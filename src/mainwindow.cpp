@@ -11,7 +11,19 @@
 #include <QFormLayout>
 #include <QTranslator>
 #include <QFileDialog>
+#include <QPair>
 
+static QMap<MainWindow::ReactionStepTypes, QColor> init_StepColors() {
+    QMap<MainWindow::ReactionStepTypes, QColor> map;
+
+    map.insert(MainWindow::ReactionStepTypes::StepReagent,               QColor(255,255,255));
+    map.insert(MainWindow::ReactionStepTypes::StepIntermediateResult,    QColor(230,230,255));
+    map.insert(MainWindow::ReactionStepTypes::StepInstruction,           QColor(255,230,230));
+
+    return map;
+}
+
+static const QMap<MainWindow::ReactionStepTypes, QColor> StepColors = init_StepColors();
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -27,8 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->reagent_table->setModel(recipelist_proxy_model);
     ui->reagent_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-    ui->splitter->setSizes({300,800});
-    ui->recipelists_selector->addItem("All",QVariant::fromValue<RecipeList*>(nullptr));
+    ui->splitter->setSizes({300,700});
+    ui->recipelists_selector->addItem(tr("All recipe lists"),QVariant::fromValue<RecipeList*>(nullptr));
 
     connect(ui->reagent_table->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(reagentlist_selection_changed(QItemSelection,QItemSelection)));
     connect(ui->search_filter, SIGNAL(textChanged(QString)), recipelist_proxy_model, SLOT(setFilterFixedString(QString)));
@@ -46,7 +58,13 @@ void MainWindow::load_recipelist(QString filename)
     RecipeList rl;
     rl.filename = filename;
 
-    YAML::Node list = YAML::LoadFile(filename.toStdString());
+    YAML::Node list;
+    try {
+         list = YAML::LoadFile(filename.toStdString());
+    } catch(YAML::Exception e) {
+        QMessageBox::critical(this, tr("Error loading recipe list"), tr("There was an error during loading of:\n%0\n\n%1").arg(filename,QString::fromStdString(e.what())));
+        return;
+    }
 
     for(auto &i: recipeLists) {
         if(filename == i.filename){
@@ -66,7 +84,7 @@ void MainWindow::load_recipelist(QString filename)
         if(list["name"]) {
             r.recipelist = QString::fromStdString(list["name"].as<std::string>());
         } else {
-            r.recipelist = "Unnamed recipe list";
+            r.recipelist = tr("Unnamed recipe list");
         }
 
         r.name = QString::fromStdString(entry["name"].as<std::string>());
@@ -120,7 +138,7 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     QGridLayout* layout = new QGridLayout(w);
     QTableWidget* ingredient_table = new QTableWidget(0,1,w);
 
-    ingredient_table->setHorizontalHeaderLabels({"Ingredient"});
+    ingredient_table->setHorizontalHeaderLabels({tr("Ingredient")});
     ingredient_table->verticalHeader()->setVisible(false);
     ingredient_table->horizontalHeader()->setStretchLastSection(true);
     ingredient_table->setShowGrid(false);
@@ -140,10 +158,89 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     ingredient_table->resizeRowsToContents();
 
     if(reagent->properties.contains("heat_to")) {
-        QLabel* l = new QLabel(QString("Heat to %0 degrees.").arg(reagent->properties["heat_to"].toString()));
+        QLabel* l = new QLabel(tr("Heat to %0 degrees.").arg(reagent->properties["heat_to"].toString()));
         layout->addWidget(l);
     }
+
     layout->setRowStretch(layout->rowCount(),100);
+    w->setLayout(layout);
+
+    return w;
+}
+
+bool ReactionListLessThan(const MainWindow::ReactionStep &s1, const MainWindow::ReactionStep &s2)
+{
+    return s1.second > s2.second;
+}
+
+QList<MainWindow::ReactionStep> MainWindow::gather_reactions(QString reagent, int level)
+{
+    /*
+     * QList of:
+     * QPair:
+     *   QPair:
+     *     reagent name
+     *     step type  - StepReagent - normal reagent
+     *                  StepIntermediateResult - reaction result
+     *                  StepInstruction - instructions
+     *   reaction level - higher = must be made first
+    */
+    QList<ReactionStep> reagents_list;
+    Reagent *r=nullptr;
+
+    for(auto &i: reagents) {
+        if(i.name == reagent)
+            r = &i;
+    }
+
+    if(r) {
+        if(r->ingredients.isEmpty()) {
+            reagents_list.append({{reagent,MainWindow::ReactionStepTypes::StepReagent}, level});
+        } else {
+            for(auto &i: r->ingredients) {
+                reagents_list.append(gather_reactions(i, level+1));
+            }
+            reagents_list.append({{tr("Makes: %0").arg(reagent), MainWindow::ReactionStepTypes::StepIntermediateResult}, level+1});
+        }
+        if(r->properties.contains("heat_to")) {
+            reagents_list.append({{tr("Heat to %0").arg(r->properties["heat_to"].toString()), MainWindow::ReactionStepTypes::StepInstruction}, level});
+        }
+    } else {
+        reagents_list.append({{reagent,MainWindow::ReactionStepTypes::StepReagent}, level});
+    }
+
+    return reagents_list;
+}
+
+
+QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
+{
+    QWidget* w = new QWidget();
+    QGridLayout* layout = new QGridLayout(w);
+    QTableWidget* directions_table = new QTableWidget(0,1,w);
+
+    directions_table->setHorizontalHeaderLabels({tr("Step")});
+    directions_table->horizontalHeader()->setStretchLastSection(true);
+    directions_table->setShowGrid(false);
+    directions_table->setSelectionBehavior(QAbstractItemView::SelectRows);
+    directions_table->setSelectionMode(QAbstractItemView::SingleSelection);
+    directions_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    directions_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    directions_table->setShowGrid(true);
+
+    layout->addWidget(directions_table);
+
+    auto reaction_list = gather_reactions(reagent->name);
+    qStableSort(reaction_list.begin(),reaction_list.end(), ReactionListLessThan);
+
+    for(auto &i: reaction_list) {
+        QTableWidgetItem *newItem = new QTableWidgetItem(QString(i.second*3, ' ') + i.first.first);
+        newItem->setBackgroundColor(StepColors[i.first.second]);
+        directions_table->insertRow(directions_table->rowCount());
+        directions_table->setItem(directions_table->rowCount()-1, 0, newItem);
+    }
+    directions_table->resizeRowsToContents();
+
     w->setLayout(layout);
 
     return w;
@@ -184,13 +281,15 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected, c
     ui->groupBox->setTitle(r->name);
 
     if(r->ingredients.length() > 0) {
-        QWidget* w=create_ingredient_tab(r);
-        ui->tabWidget->addTab(w, "Ingredients");
+        QWidget* ing=create_ingredient_tab(r);
+        ui->tabWidget->addTab(ing, tr("Ingredients"));
+        QWidget* dir=create_directions_tab(r);
+        ui->tabWidget->addTab(dir, tr("Directions"));
     }
 
     if(r->properties.contains("info")) {
         QWidget* w=create_info_tab(r);
-        ui->tabWidget->addTab(w, "Information");
+        ui->tabWidget->addTab(w, tr("Information"));
     }
 }
 
@@ -257,3 +356,5 @@ void MainWindow::on_recipelists_selector_currentIndexChanged(int index)
     RecipeList* r = ui->recipelists_selector->itemData(index, Qt::UserRole).value<RecipeList*>();
     recipelist_proxy_model->setRecipeList(r);
 }
+
+

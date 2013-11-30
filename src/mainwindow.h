@@ -40,8 +40,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-
-
     template <typename T>
     static T getSetting(const QString& name, const QSettings &settings = QSettings(SETTINGS_FILENAME, QSettings::IniFormat)) {
         QString key(name);
@@ -53,17 +51,18 @@ public:
         return settings.value(name).value<T>();
     }
 
+    enum class ReactionStepTypes {StepReagent, StepInstruction, StepIntermediateResult};
+    typedef QPair<QPair<QString, MainWindow::ReactionStepTypes>, int> ReactionStep;
+
     void load_saved_recipelists();
     void load_recipelist(QString filename);
     void save_settings();
 
-public slots:
+private slots:
     void reagentlist_selection_changed(const QItemSelection & selected, const QItemSelection & deselected);
     void ingredientlist_selection_doubleclicked(int x, int y);
 
-private slots:
     void on_actionAdd_recipe_list_triggered();
-
     void on_recipelists_selector_currentIndexChanged(int index);
 
 private:
@@ -78,6 +77,8 @@ private:
 
     QWidget *create_ingredient_tab(const Reagent *reagent);
     QWidget *create_info_tab(const Reagent *reagent);
+    QWidget *create_directions_tab(const Reagent *reagent);
+    QList<ReactionStep>  gather_reactions(QString reagent, int level=0);
 };
 
 #endif // MAINWINDOW_H
