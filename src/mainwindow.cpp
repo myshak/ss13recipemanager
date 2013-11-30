@@ -156,7 +156,7 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     ingredient_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     ingredient_table->setSelectionMode(QAbstractItemView::SingleSelection);
     ingredient_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ingredient_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    ingredient_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     connect(ingredient_table, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(ingredientlist_selection_doubleclicked(int,int)));
 
     layout->addWidget(ingredient_table);
@@ -166,7 +166,6 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
         ingredient_table->insertRow(ingredient_table->rowCount());
         ingredient_table->setItem(ingredient_table->rowCount()-1, 0, newItem);
     }
-    ingredient_table->resizeRowsToContents();
 
     if(reagent->properties.contains("heat_to")) {
         QLabel* l = new QLabel(tr("Heat to %0 degrees.").arg(reagent->properties["heat_to"].toString()));
@@ -181,7 +180,6 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
         layout->addWidget(l);
     }
 
-    layout->setRowStretch(layout->rowCount(),100);
     w->setLayout(layout);
 
     return w;
@@ -347,7 +345,6 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
         directions_table->insertRow(directions_table->rowCount());
         directions_table->setItem(directions_table->rowCount()-1, 0, newItem);
     }
-    directions_table->resizeRowsToContents();
 
     w->setLayout(layout);
 
