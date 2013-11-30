@@ -18,7 +18,8 @@ static QMap<MainWindow::ReactionStepTypes, QColor> init_StepColors() {
 
     map.insert(MainWindow::ReactionStepTypes::StepReagent,               QColor(255,255,255));
     map.insert(MainWindow::ReactionStepTypes::StepIntermediateResult,    QColor(230,230,255));
-    map.insert(MainWindow::ReactionStepTypes::StepInstruction,           QColor(255,230,230));
+    map.insert(MainWindow::ReactionStepTypes::StepInstruction,           QColor(230,255,230));
+    map.insert(MainWindow::ReactionStepTypes::StepHeat,                  QColor(255,230,230));
 
     return map;
 }
@@ -182,7 +183,7 @@ bool ReactionListLessThan(const MainWindow::ReactionStep &s1, const MainWindow::
     return s1.second > s2.second;
 }
 
-QList<MainWindow::ReactionStep> MainWindow::gather_reactions(QString reagent, int level)
+QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, int level)
 {
     /*
      * QList of:
@@ -195,27 +196,31 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(QString reagent, in
      *   reaction level - higher = must be made first
     */
     QList<ReactionStep> reagents_list;
-    Reagent *r=nullptr;
 
-    for(auto &i: reagents) {
-        if(i.name == reagent)
-            r = &i;
-    }
-
-    if(r) {
-        if(r->properties.contains("heat_to")) {
-            reagents_list.append({{tr("Heat to %0").arg(r->properties["heat_to"].toString()), MainWindow::ReactionStepTypes::StepInstruction}, level+1});
-        }
-        if(r->ingredients.isEmpty()) {
-            reagents_list.append({{reagent,MainWindow::ReactionStepTypes::StepReagent}, level});
-        } else {
-            for(auto &i: r->ingredients) {
-                reagents_list.append(gather_reactions(i, level+1));
-            }
-            reagents_list.append({{tr("Makes: %0").arg(reagent), MainWindow::ReactionStepTypes::StepIntermediateResult}, level+1});
-        }
-    } else {
+    if(reagent.ingredients.isEmpty()) {
         reagents_list.append({{reagent,MainWindow::ReactionStepTypes::StepReagent}, level});
+    } else {
+        for(auto &ingredient: reagent.ingredients) {
+            Reagent r;
+            for(auto &i: reagents) {
+                if(i.name == ingredient) {
+                    r = i;
+                    break;
+                }
+            }
+
+            if(!r.name.isEmpty()) {
+                reagents_list.append(gather_reactions(r, level+1));
+
+            } else {
+                r.name = ingredient;
+                reagents_list.append({{r,MainWindow::ReactionStepTypes::StepReagent}, level+1});
+            }
+        }
+        if(reagent.properties.contains("heat_to")) {
+            reagents_list.append({{reagent, MainWindow::ReactionStepTypes::StepHeat}, level+1});
+        }
+        reagents_list.append({{reagent, MainWindow::ReactionStepTypes::StepIntermediateResult}, level+1});
     }
 
     return reagents_list;
@@ -239,12 +244,31 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
 
     layout->addWidget(directions_table);
 
-    auto reaction_list = gather_reactions(reagent->name);
+    auto reaction_list = gather_reactions(*reagent);
     qStableSort(reaction_list.begin(),reaction_list.end(), ReactionListLessThan);
 
     for(auto &i: reaction_list) {
-        QTableWidgetItem *newItem = new QTableWidgetItem(QString((i.second-1)*3, ' ') + i.first.first);
-        newItem->setBackgroundColor(StepColors[i.first.second]);
+        QColor color = StepColors[i.first.second];
+        QString text = QString((i.second-1)*3, ' ');
+
+        switch(i.first.second) {
+        case ReactionStepTypes::StepIntermediateResult:
+            text += QString(tr("Makes: %0")).arg(i.first.first.name);
+            break;
+        case ReactionStepTypes::StepInstruction:
+            text += QString(tr("Makes: %0")).arg(i.first.first.name);
+            break;
+        case ReactionStepTypes::StepHeat:
+            text += QString(tr("Heat to %0")).arg(i.first.first.properties["heat_to"].toString());
+            break;
+        case ReactionStepTypes::StepReagent:
+        default:
+            text += i.first.first.name;
+            break;
+        }
+
+        QTableWidgetItem *newItem = new QTableWidgetItem(text);
+        newItem->setBackgroundColor(color);
         directions_table->insertRow(directions_table->rowCount());
         directions_table->setItem(directions_table->rowCount()-1, 0, newItem);
     }

@@ -51,8 +51,8 @@ public:
         return settings.value(name).value<T>();
     }
 
-    enum class ReactionStepTypes {StepReagent, StepInstruction, StepIntermediateResult};
-    typedef QPair<QPair<QString, MainWindow::ReactionStepTypes>, int> ReactionStep;
+    enum ReactionStepTypes {StepReagent, StepInstruction, StepHeat, StepIntermediateResult};
+    typedef QPair<QPair<Reagent, MainWindow::ReactionStepTypes>, int> ReactionStep;
 
     void load_saved_recipelists();
     void load_recipelist(QString filename);
@@ -78,7 +78,7 @@ private:
     QWidget *create_ingredient_tab(const Reagent *reagent);
     QWidget *create_info_tab(const Reagent *reagent);
     QWidget *create_directions_tab(const Reagent *reagent);
-    QList<ReactionStep>  gather_reactions(QString reagent, int level=0);
+    QList<ReactionStep>  gather_reactions(Reagent reagent, int level=0);
 };
 
 #endif // MAINWINDOW_H
