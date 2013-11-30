@@ -1,3 +1,9 @@
+# Mercurial stuff
+.hg
+.hgeol
+.hgignore
+.hgtags
+
 # C++ objects and libs
 
 *.slo
