@@ -205,7 +205,7 @@ QWidget* MainWindow::create_sources_tab(const Reagent *reagent)
         scrollarea_layout->addWidget(newSource);
     }
 
-    scrollarea_layout->setRowStretch(layout->rowCount(),100);
+    scrollarea_layout->setRowStretch(scrollarea_layout->rowCount(),100);
     scroll_area->setLayout(scrollarea_layout);
     w->setLayout(layout);
 
