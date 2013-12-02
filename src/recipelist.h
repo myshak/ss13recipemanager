@@ -8,9 +8,12 @@ class RecipeList
 {
 public:
     RecipeList();
+    RecipeList(QString name, QString file);
 
-    QString filename;
     QString name;
+    QString filename;
+
+    bool operator==(const RecipeList &r) const;
 };
 Q_DECLARE_METATYPE(RecipeList*)
 

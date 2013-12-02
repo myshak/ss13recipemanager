@@ -24,7 +24,8 @@ SOURCES += src/main.cpp\
         src/mainwindow.cpp \
     src/reagent.cpp \
     src/recipelist.cpp \
-    src/recipelistproxymodel.cpp
+    src/recipelistproxymodel.cpp \
+    src/managedialog.cpp
 
 SOURCES += $$files(src/yaml-cpp/src/*.cpp)
 
@@ -32,11 +33,13 @@ SOURCES += $$files(src/yaml-cpp/src/*.cpp)
 HEADERS  += src/mainwindow.h \
     src/reagent.h \
     src/recipelist.h \
-    src/recipelistproxymodel.h
+    src/recipelistproxymodel.h \
+    src/managedialog.h
 
 HEADERS += $$files(src/yaml-cpp/src/*.h)
 
-FORMS    += src/mainwindow.ui
+FORMS    += src/mainwindow.ui \
+    src/managedialog.ui
 
 TRANSLATIONS = \
     translations/ss13recipemanager_en.ts

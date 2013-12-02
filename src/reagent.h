@@ -15,7 +15,6 @@ public:
     QString fromFile;
 
     QString recipelist;
-//    QList<QString> ingredients;
     QStringList ingredients;
     QHash<QString, QVariant> properties;
 };

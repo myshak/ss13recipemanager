@@ -57,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->splitter->setSizes({300,700});
     ui->recipelists_selector->addItem(tr("All recipe lists"),QVariant::fromValue<RecipeList*>(nullptr));
 
-    connect(ui->reagent_table->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(reagentlist_selection_changed(QItemSelection,QItemSelection)));
+    connect(ui->reagent_table->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(reagentlist_selection_changed(QItemSelection/*,QItemSelection*/)));
     connect(ui->search_filter, SIGNAL(textChanged(QString)), recipelist_proxy_model, SLOT(setFilterFixedString(QString)));
 
     load_saved_recipelists();
@@ -75,7 +75,7 @@ void MainWindow::load_recipelist(QString filename)
 
     YAML::Node list;
     try {
-         list = YAML::LoadFile(filename.toStdString());
+        list = YAML::LoadFile(filename.toStdString());
     } catch(YAML::Exception e) {
         QMessageBox::critical(this, tr("Error loading recipe list"), tr("There was an error during loading of:\n%0\n\n%1").arg(filename,QString::fromStdString(e.what())));
         return;
@@ -90,7 +90,6 @@ void MainWindow::load_recipelist(QString filename)
 
     rl.name = QString::fromStdString(list["name"].as<std::string>());
     recipeLists.append(rl);
-    ui->recipelists_selector->addItem(rl.name, QVariant::fromValue(&recipeLists.last()));
 
     for(YAML::const_iterator it=list["recipes"].begin();it!=list["recipes"].end();++it) {
         YAML::Node entry = *it;
@@ -133,8 +132,41 @@ void MainWindow::load_recipelist(QString filename)
         }
 
         reagents.append(r);
-        QStandardItem* item = new QStandardItem(r.name);
-        item->setData(QVariant::fromValue(&(reagents.last())), Qt::UserRole+1);
+    }
+
+    reload_recipe_list();
+    reload_recipelist_selector();
+}
+
+void MainWindow::reload_recipelist_selector()
+{
+    ui->recipelists_selector->clear();
+
+    ui->recipelists_selector->addItem(tr("All recipe lists"),QVariant::fromValue<RecipeList*>(nullptr));
+
+    for(auto &i: recipeLists) {
+        ui->recipelists_selector->addItem(i.name, QVariant::fromValue(&i));
+    }
+}
+
+void MainWindow::reload_recipelists(QStringList rl)
+{
+    recipeLists.clear();
+    reagents.clear();
+    recipelist_model->clear();
+    for(auto &i: rl) {
+        load_recipelist(i);
+    }
+    settings_changed = true;
+}
+
+void MainWindow::reload_recipe_list()
+{
+    recipelist_model->clear();
+
+    for(auto &i: reagents) {
+        QStandardItem* item = new QStandardItem(i.name);
+        item->setData(QVariant::fromValue(&(i)), Qt::UserRole+1);
         recipelist_model->appendRow(item);
     }
     recipelist_model->sort(0);
@@ -180,7 +212,7 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     }
 
     if(reagent->properties.contains("heat_to")) {
-        QLabel* l = new QLabel(tr("Heat to %0 degrees.").arg(reagent->properties["heat_to"].toString()));
+        QLabel* l = new QLabel(tr("Heat to %0").arg(reagent->properties["heat_to"].toString()));
         layout->addWidget(l);
     }
 
@@ -384,7 +416,7 @@ QWidget *MainWindow::create_info_tab(const Reagent *reagent)
     return w;
 }
 
-void MainWindow::reagentlist_selection_changed(const QItemSelection &selected, const QItemSelection &deselected)
+void MainWindow::reagentlist_selection_changed(const QItemSelection &selected/*, const QItemSelection &deselected*/)
 {
     if(selected.length() == 0)
         return;
@@ -453,6 +485,8 @@ void MainWindow::save_settings()
 
     settings.sync();
 
+    settings_changed = false;
+
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -488,4 +522,15 @@ void MainWindow::on_recipelists_selector_currentIndexChanged(int index)
     recipelist_proxy_model->setRecipeList(r);
 }
 
+void MainWindow::on_action_Manage_recipe_lists_triggered()
+{
+    ManageDialog* dialog = new ManageDialog(this);
+    QObject::connect(dialog, SIGNAL(reload_recipelists(QStringList)), this, SLOT(reload_recipelists(QStringList)));
+    dialog->exec();
+}
 
+void MainWindow::on_action_Save_settings_triggered()
+{
+    save_settings();
+    settings_changed = false;
+}

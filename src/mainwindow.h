@@ -4,8 +4,10 @@
 #include <QMainWindow>
 #include <QSettings>
 #include <QStandardItemModel>
+#include <QStringList>
 #include <QList>
 
+#include "managedialog.h"
 #include "reagent.h"
 #include "recipelist.h"
 #include "recipelistproxymodel.h"
@@ -55,15 +57,24 @@ public:
     void load_saved_recipelists();
     void load_recipelist(QString filename);
     void save_settings();
+    void reload_recipe_list();
+    void reload_recipelist_selector();
+
+public slots:
+    void reload_recipelists(QStringList rl);
 
 private slots:
-    void reagentlist_selection_changed(const QItemSelection & selected, const QItemSelection & deselected);
+    void reagentlist_selection_changed(const QItemSelection & selected/*, const QItemSelection & deselected*/);
     void ingredientlist_selection_doubleclicked(int x, int y);
 
     void on_actionAdd_recipe_list_triggered();
     void on_recipelists_selector_currentIndexChanged(int index);
+    void on_action_Manage_recipe_lists_triggered();
+
+    void on_action_Save_settings_triggered();
 
 private:
+    friend class ManageDialog;
     Ui::MainWindow *ui;
     QStandardItemModel *recipelist_model;
     RecipeListProxyModel *recipelist_proxy_model;

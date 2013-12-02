@@ -2,6 +2,7 @@
 #include "reagent.h"
 
 RecipeListProxyModel::RecipeListProxyModel(QObject *parent)
+    : QSortFilterProxyModel(parent)
 {
 }
 

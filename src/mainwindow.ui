@@ -151,6 +151,7 @@
     <addaction name="actionAdd_recipe_list"/>
     <addaction name="action_Manage_recipe_lists"/>
     <addaction name="separator"/>
+    <addaction name="action_Save_settings"/>
     <addaction name="action_Exit"/>
    </widget>
    <addaction name="menuFile"/>
@@ -171,13 +172,18 @@
     <string>&amp;Exit</string>
    </property>
   </action>
+  <action name="action_Save_settings">
+   <property name="text">
+    <string>&amp;Save settings</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections>
   <connection>
    <sender>action_Exit</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
    <hints>
