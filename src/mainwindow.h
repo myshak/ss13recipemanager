@@ -6,8 +6,6 @@
 #include <QStandardItemModel>
 #include <QList>
 
-#include <unordered_map>
-
 #include "reagent.h"
 #include "recipelist.h"
 #include "recipelistproxymodel.h"

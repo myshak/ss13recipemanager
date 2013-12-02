@@ -3,7 +3,7 @@
 
 #include <QMetaType>
 #include <QHash>
-#include <QList>
+#include <QStringList>
 #include <QVariant>
 
 class Reagent
@@ -15,7 +15,8 @@ public:
     QString fromFile;
 
     QString recipelist;
-    QList<QString> ingredients;
+//    QList<QString> ingredients;
+    QStringList ingredients;
     QHash<QString, QVariant> properties;
 };
 

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>translations/ss13recipemanager_en.qm</file>
+    </qresource>
+</RCC>

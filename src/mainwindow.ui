@@ -18,7 +18,10 @@
     <item row="0" column="0">
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Filter:</string>
+       <string>&amp;Filter:</string>
+      </property>
+      <property name="buddy">
+       <cstring>search_filter</cstring>
       </property>
      </widget>
     </item>
@@ -143,20 +146,50 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>Fi&amp;le</string>
     </property>
     <addaction name="actionAdd_recipe_list"/>
+    <addaction name="action_Manage_recipe_lists"/>
+    <addaction name="separator"/>
+    <addaction name="action_Exit"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionAdd_recipe_list">
    <property name="text">
-    <string>Add recipe list</string>
+    <string>&amp;Add recipe list</string>
+   </property>
+  </action>
+  <action name="action_Manage_recipe_lists">
+   <property name="text">
+    <string>&amp;Manage recipe lists</string>
+   </property>
+  </action>
+  <action name="action_Exit">
+   <property name="text">
+    <string>&amp;Exit</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>action_Exit</sender>
+   <signal>activated()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>512</x>
+     <y>307</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

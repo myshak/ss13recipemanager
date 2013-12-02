@@ -15,6 +15,18 @@
 #include <QScrollArea>
 #include <QPair>
 
+#if 0
+// Strings for lupdate
+QStringList lupdate_unused = {
+QT_TRANSLATE_NOOP("InfoStrings","depletion_rate"),
+QT_TRANSLATE_NOOP("InfoStrings","penetrates_skin"),
+QT_TRANSLATE_NOOP("InfoStrings","ignition_temp"),
+QT_TRANSLATE_NOOP("InfoStrings","application_effect"),
+QT_TRANSLATE_NOOP("InfoStrings","notes"),
+QT_TRANSLATE_NOOP("InfoStrings","per_cycle")
+};
+#endif
+
 static QMap<MainWindow::ReactionStepTypes, QColor> init_StepColors() {
     QMap<MainWindow::ReactionStepTypes, QColor> map;
 
@@ -230,7 +242,7 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
 
 
     for(auto &i: reagents) {
-        if(i.ingredients.contains(reagent->name)) {
+        if(i.ingredients.contains(reagent->name, Qt::CaseInsensitive)) {
             QTableWidgetItem *newItem = new QTableWidgetItem(i.name);
             reagent_table->insertRow(reagent_table->rowCount());
             reagent_table->setItem(reagent_table->rowCount()-1, 0, newItem);
@@ -276,7 +288,7 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, in
         for(auto &ingredient: reagent.ingredients) {
             Reagent r;
             for(auto &i: reagents) {
-                if(i.name == ingredient) {
+                if(i.name.compare(ingredient, Qt::CaseInsensitive) == 0) {
                     r = i;
                     break;
                 }
@@ -365,7 +377,7 @@ QWidget *MainWindow::create_info_tab(const Reagent *reagent)
         l->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
         l->setAlignment(Qt::AlignTop);
 
-        layout->addRow(QApplication::translate("InfoTab", it.key().toAscii()), l);
+        layout->addRow(QApplication::translate("InfoStrings", it.key().toAscii()), l);
     }
 
     w->setLayout(layout);
@@ -387,36 +399,42 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected, c
 
     if(r->ingredients.length() > 0) {
         QWidget* ing=create_ingredient_tab(r);
-        ui->tabWidget->addTab(ing, tr("Ingredients"));
+        ui->tabWidget->addTab(ing, tr("&Ingredients"));
         QWidget* dir=create_directions_tab(r);
-        ui->tabWidget->addTab(dir, tr("Directions"));
+        ui->tabWidget->addTab(dir, tr("&Directions"));
     }
 
     if(r->properties.contains("info")) {
         QWidget* w=create_info_tab(r);
-        ui->tabWidget->addTab(w, tr("Information"));
+        ui->tabWidget->addTab(w, tr("I&nformation"));
     }
 
     if(r->properties.contains("sources")) {
         QWidget* w=create_sources_tab(r);
-        ui->tabWidget->addTab(w, tr("Sources"));
+        ui->tabWidget->addTab(w, tr("&Sources"));
     }
 
     QWidget* usedin=create_usedin_tab(r);
-    ui->tabWidget->addTab(usedin, tr("Used in"));
+    ui->tabWidget->addTab(usedin, tr("&Used in"));
 }
 
 void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
 {
     QTableWidget* ingredient_table = static_cast<QTableWidget*>(sender());
+
+    // Find the selected reagent in all recipe lists, case insensitive
     QString reagent = ingredient_table->item(x,y)->text();
-    QList<QStandardItem*> found_reagents = recipelist_model->findItems(reagent);
+    QList<QStandardItem*> found_reagents = recipelist_model->findItems(reagent, Qt::MatchFixedString);
 
     if(!found_reagents.empty()) {
-        ui->reagent_table->selectionModel()->clearSelection();
-        ui->search_filter->clear(); // Clear the filtering, so we have all the available reagents
+        ui->search_filter->clear(); // Clear the filtering, so we have all the available reagents to select
+        ui->recipelists_selector->setCurrentIndex(0); // Set the recipe list filter to all
+        recipelist_proxy_model->setRecipeList(nullptr);
+
         QModelIndex i = recipelist_proxy_model->mapFromSource(found_reagents[0]->index());
+        ui->reagent_table->selectionModel()->reset();
         ui->reagent_table->selectionModel()->select(i, QItemSelectionModel::Select);
+        ui->reagent_table->scrollTo(i);
     } else {
         QMessageBox::information(ingredient_table,tr("Reagent not found"), QString("Reagent %0 was not found in any of your recipe lists").arg(reagent));
     }

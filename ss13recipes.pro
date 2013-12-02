@@ -38,5 +38,8 @@ HEADERS += $$files(src/yaml-cpp/src/*.h)
 
 FORMS    += src/mainwindow.ui
 
-#TRANSLATIONS = \
-#    translations/ss13recipemanager_en.ts
+TRANSLATIONS = \
+    translations/ss13recipemanager_en.ts
+
+RESOURCES += \
+    res.qrc
