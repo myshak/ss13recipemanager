@@ -73,6 +73,8 @@ private slots:
 
     void on_action_Save_settings_triggered();
 
+    void on_actionAbout_Recipe_Manager_triggered();
+
 private:
     friend class ManageDialog;
     Ui::MainWindow *ui;

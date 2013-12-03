@@ -534,3 +534,12 @@ void MainWindow::on_action_Save_settings_triggered()
     save_settings();
     settings_changed = false;
 }
+
+void MainWindow::on_actionAbout_Recipe_Manager_triggered()
+{
+
+    QMessageBox::about(this, tr("About Recipe Manager"), trUtf8("Recipe Manager\n© 2013 by mysha (mysha@mysha.cu.cc)\n"
+                                                            "\n"
+                                                            "Donations in bitcons or goon membership are appreciated\n\n"
+                                                            "BTC donation address: %0").arg("1Gzk3F4C4FiMVjTHCCkRuRwqZoCKujtBXd"));
+}

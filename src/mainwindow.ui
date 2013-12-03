@@ -154,7 +154,14 @@
     <addaction name="action_Save_settings"/>
     <addaction name="action_Exit"/>
    </widget>
+   <widget class="QMenu" name="menu_About">
+    <property name="title">
+     <string>&amp;About</string>
+    </property>
+    <addaction name="actionAbout_Recipe_Manager"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menu_About"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionAdd_recipe_list">
@@ -175,6 +182,11 @@
   <action name="action_Save_settings">
    <property name="text">
     <string>&amp;Save settings</string>
+   </property>
+  </action>
+  <action name="actionAbout_Recipe_Manager">
+   <property name="text">
+    <string>About Recipe Manager</string>
    </property>
   </action>
  </widget>
