@@ -186,7 +186,7 @@
   </action>
   <action name="actionAbout_Recipe_Manager">
    <property name="text">
-    <string>About Recipe Manager</string>
+    <string>A&amp;bout Recipe Manager</string>
    </property>
   </action>
  </widget>

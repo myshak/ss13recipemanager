@@ -52,24 +52,39 @@
         <translation>Fi&amp;le</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="162"/>
+        <location filename="../src/mainwindow.ui" line="159"/>
+        <source>&amp;About</source>
+        <translation>&amp;About</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.ui" line="169"/>
         <source>&amp;Add recipe list</source>
         <translation>&amp;Add recipe list</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="167"/>
+        <location filename="../src/mainwindow.ui" line="174"/>
         <source>&amp;Manage recipe lists</source>
         <translation>&amp;Manage recipe lists</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="172"/>
+        <location filename="../src/mainwindow.ui" line="179"/>
         <source>&amp;Exit</source>
         <translation>&amp;Exit</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="177"/>
+        <location filename="../src/mainwindow.ui" line="184"/>
         <source>&amp;Save settings</source>
         <translation>&amp;Save settings</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.ui" line="189"/>
+        <source>A&amp;bout Recipe Manager</source>
+        <translation>A&amp;bout Recipe Manager</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="541"/>
+        <source>About Recipe Manager</source>
+        <translation>About Recipe Manager</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.cpp" line="512"/>
@@ -196,6 +211,21 @@
         <location filename="../src/mainwindow.cpp" line="496"/>
         <source>Do you want to save modified settings befre exiting?</source>
         <translation>Do you want to save modified settings befre exiting?</translation>
+    </message>
+    <message utf8="true">
+        <location filename="../src/mainwindow.cpp" line="541"/>
+        <source>Recipe Manager
+© 2013 by mysha (mysha@mysha.cu.cc)
+
+Donations in bitcons or goon membership are appreciated
+
+BTC donation address: %0</source>
+        <translation>Recipe Manager
+© 2013 by mysha (mysha@mysha.cu.cc)
+
+Donations in bitcons or goon membership are appreciated
+
+BTC donation address: %0</translation>
     </message>
 </context>
 <context>
