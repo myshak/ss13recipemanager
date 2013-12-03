@@ -183,6 +183,11 @@
         <translation>Reagent not found</translation>
     </message>
     <message>
+        <location filename="../src/mainwindow.cpp" line="471"/>
+        <source>Reagent %0 was not found in any of your recipe lists</source>
+        <translation>Reagent %0 was not found in any of your recipe lists</translation>
+    </message>
+    <message>
         <location filename="../src/mainwindow.cpp" line="496"/>
         <source>Save before quitting?</source>
         <translation>Save before quitting?</translation>

@@ -468,7 +468,7 @@ void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
         ui->reagent_table->selectionModel()->select(i, QItemSelectionModel::Select);
         ui->reagent_table->scrollTo(i);
     } else {
-        QMessageBox::information(ingredient_table,tr("Reagent not found"), QString("Reagent %0 was not found in any of your recipe lists").arg(reagent));
+        QMessageBox::information(ingredient_table,tr("Reagent not found"), tr("Reagent %0 was not found in any of your recipe lists").arg(reagent));
     }
 }
 
