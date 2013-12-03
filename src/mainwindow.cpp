@@ -22,6 +22,7 @@ QT_TRANSLATE_NOOP("InfoStrings","depletion_rate"),
 QT_TRANSLATE_NOOP("InfoStrings","penetrates_skin"),
 QT_TRANSLATE_NOOP("InfoStrings","ignition_temp"),
 QT_TRANSLATE_NOOP("InfoStrings","application_effect"),
+QT_TRANSLATE_NOOP("InfoStrings","overdose_threshold"),
 QT_TRANSLATE_NOOP("InfoStrings","notes"),
 QT_TRANSLATE_NOOP("InfoStrings","per_cycle")
 };
