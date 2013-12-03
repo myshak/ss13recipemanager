@@ -217,10 +217,24 @@
         <source>Recipe Manager
 © 2013 by mysha (mysha@mysha.cu.cc)
 
-Donations in bitcons or goon membership are appreciated
+Donations in bitcoins or goon membership are appreciated.
 
 BTC donation address: %0</source>
         <translation>Recipe Manager
+© 2013 by mysha (mysha@mysha.cu.cc)
+
+Donations in bitcoins or goon membership are appreciated.
+
+BTC donation address: %0</translation>
+    </message>
+    <message utf8="true">
+        <source>Recipe Manager
+© 2013 by mysha (mysha@mysha.cu.cc)
+
+Donations in bitcons or goon membership are appreciated
+
+BTC donation address: %0</source>
+        <translation type="obsolete">Recipe Manager
 © 2013 by mysha (mysha@mysha.cu.cc)
 
 Donations in bitcons or goon membership are appreciated
