@@ -26,7 +26,11 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QLineEdit" name="search_filter"/>
+     <widget class="QLineEdit" name="search_filter">
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type to filter reagents by name.&lt;/p&gt;&lt;p&gt;Use tag:text to filter reagents with the tag 'text'. You can use multiple tags in the filter.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+     </widget>
     </item>
     <item row="1" column="0" colspan="2">
      <widget class="QSplitter" name="splitter">

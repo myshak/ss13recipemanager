@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->recipelists_selector->addItem(tr("All recipe lists"),QVariant::fromValue<RecipeList*>(nullptr));
 
     connect(ui->reagent_table->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(reagentlist_selection_changed(QItemSelection/*,QItemSelection*/)));
-    connect(ui->search_filter, SIGNAL(textChanged(QString)), recipelist_proxy_model, SLOT(setFilterFixedString(QString)));
+    connect(ui->search_filter, SIGNAL(textChanged(QString)), recipelist_proxy_model, SLOT(setFilterString(QString)));
 
     load_saved_recipelists();
 }
@@ -403,14 +403,25 @@ QWidget *MainWindow::create_info_tab(const Reagent *reagent)
     layout->setRowWrapPolicy(QFormLayout::WrapLongRows);
     layout->setHorizontalSpacing(20);
 
-    QMap<QString, QVariant> info = reagent->properties["info"].toMap();
-    for(auto it = info.constBegin(); it != info.constEnd(); ++it) {
-        QLabel *l = new QLabel(it.value().toString());
+    if(reagent->properties.contains("info")) {
+        QMap<QString, QVariant> info = reagent->properties["info"].toMap();
+        for(auto it = info.constBegin(); it != info.constEnd(); ++it) {
+            QLabel *l = new QLabel(it.value().toString());
+            l->setWordWrap(true);
+            l->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
+            l->setAlignment(Qt::AlignTop);
+
+            layout->addRow(QApplication::translate("InfoStrings", it.key().toAscii()), l);
+        }
+    }
+
+    if(reagent->properties.contains("tags")) {
+        QLabel *l = new QLabel(reagent->properties["tags"].toStringList().join(", "));
         l->setWordWrap(true);
         l->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
         l->setAlignment(Qt::AlignTop);
 
-        layout->addRow(QApplication::translate("InfoStrings", it.key().toAscii()), l);
+        layout->addRow(tr("Tags"), l);
     }
 
     w->setLayout(layout);
@@ -437,7 +448,7 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected/*,
         ui->tabWidget->addTab(dir, tr("&Directions"));
     }
 
-    if(r->properties.contains("info")) {
+    if(r->properties.contains("info") || r->properties.contains("tags")) {
         QWidget* w=create_info_tab(r);
         ui->tabWidget->addTab(w, tr("I&nformation"));
     }

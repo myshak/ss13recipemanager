@@ -18,12 +18,53 @@ void RecipeListProxyModel::setFilterReagentRole(const int role)
     invalidateFilter();
 }
 
+void RecipeListProxyModel::setFilterString(const QString &pattern)
+{
+    QStringList fixed_pattern;
+
+    tags.clear();
+
+    for(QString &i: pattern.split(" ")) {
+        if(i.startsWith("tag:", Qt::CaseInsensitive)) {
+            QString tag = i.mid(4); // From end if 'tag:' onwards
+            if(!tag.isEmpty()) {
+                tags.append(tag);
+            }
+        } else {
+            fixed_pattern.append(i);
+        }
+    }
+
+    QSortFilterProxyModel::setFilterFixedString(fixed_pattern.join(" ").trimmed());
+}
+bool RecipeListProxyModel::matchesTags(const Reagent* r) const
+{
+    // Not really needed
+    if(tags.isEmpty()) {
+        return true;
+    }
+
+    if(r->properties.contains("tags")) {
+        QStringList reagent_tags = r->properties["tags"].toStringList();
+        for(auto &i: tags) {
+            if(! reagent_tags.contains(i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
 bool RecipeListProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     bool accept = QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
+    bool matches = accept;
 
-    if (!recipelist)
-        return accept;
+    if (!recipelist && tags.isEmpty())
+        return matches;
 
     if (filterKeyColumn() == -1) {
 
@@ -31,17 +72,32 @@ bool RecipeListProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
         for (int column = 0; column < column_count; ++column) {
             QModelIndex source_index = sourceModel()->index(sourceRow, column, sourceParent);
             Reagent *r = sourceModel()->data(source_index, reagentRole).value<Reagent*>();
-            if(r->recipelist == recipelist->name && r->fromFile == recipelist->filename)
-                return accept;
-        }
-        return false;
-    }
-    QModelIndex source_index = sourceModel()->index(sourceRow, filterKeyColumn(), sourceParent);
-    if (!source_index.isValid()) // the column may not exist
-        return accept;
-    Reagent *r = sourceModel()->data(source_index, reagentRole).value<Reagent*>();
-    if(r->recipelist == recipelist->name && r->fromFile == recipelist->filename)
-        return accept;
 
-    return false;
+            if(recipelist) {
+                if(r->recipelist != recipelist->name || r->fromFile != recipelist->filename) {
+                    matches = false;
+                }
+            }
+            if(tags.isEmpty() || !matchesTags(r)) {
+                matches = false;
+            }
+        }
+    } else {
+
+        QModelIndex source_index = sourceModel()->index(sourceRow, filterKeyColumn(), sourceParent);
+        if (source_index.isValid()) {
+            Reagent *r = sourceModel()->data(source_index, reagentRole).value<Reagent*>();
+            //assert(r != nullptr);
+            if(recipelist) {
+                if(r->recipelist != recipelist->name || r->fromFile != recipelist->filename) {
+                    matches = false;
+                }
+            }
+            if(!tags.isEmpty() && !matchesTags(r)) {
+                matches = false;
+            }
+        }
+    }
+
+    return matches;
 }
