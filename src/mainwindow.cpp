@@ -3,6 +3,8 @@
 
 #include "yaml-cpp/yaml.h"
 
+#include <algorithm>
+
 #include <QDebug>
 #include <QLabel>
 #include <QCloseEvent>
@@ -14,6 +16,7 @@
 #include <QFileDialog>
 #include <QScrollArea>
 #include <QPair>
+#include <QMap>
 
 #if 0
 // Strings for lupdate
@@ -60,6 +63,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->reagent_table->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)), this, SLOT(reagentlist_selection_changed(QItemSelection/*,QItemSelection*/)));
     connect(ui->search_filter, SIGNAL(textChanged(QString)), recipelist_proxy_model, SLOT(setFilterString(QString)));
+
+    ui->menuWindow->addAction(ui->dockWidget->toggleViewAction());
+
+    restoreGeometry(getSetting<QByteArray>("general/geometry"));
+    restoreState(getSetting<QByteArray>("general/windowState"));
 
     load_saved_recipelists();
 }
@@ -119,6 +127,7 @@ void MainWindow::load_recipelist(QString filename)
                     map[QString::fromStdString(m_it->first.as<std::string>())] = QString::fromStdString(m_it->second.as<std::string>());
                 }
                 r.properties[QString::fromStdString(it->first.as<std::string>())] = map;
+
             } else if(it->second.IsSequence()){
                 QList<QVariant> sequence;
                 for(YAML::const_iterator m_it=it->second.begin();m_it!=it->second.end();++m_it) {
@@ -126,6 +135,7 @@ void MainWindow::load_recipelist(QString filename)
                     sequence.append(QString::fromStdString(sequence_entry.as<std::string>()));
                 }
                 r.properties[QString::fromStdString(it->first.as<std::string>())] = sequence;
+
             } else {
                 r.properties[QString::fromStdString(it->first.as<std::string>())] = QString::fromStdString(it->second.as<std::string>());
             }
@@ -135,8 +145,41 @@ void MainWindow::load_recipelist(QString filename)
         reagents.append(r);
     }
 
+    reload_tag_cloud();
     reload_recipe_list();
     reload_recipelist_selector();
+}
+
+void MainWindow::reload_tag_cloud()
+{
+    static QStringList sizes {"small", "medium", "large", "x-large"};
+    QMap<QString,int> tags;
+
+    ui->tag_browser->clear();
+
+    for(auto r: reagents) {
+        if(r.properties.contains("tags")) {
+            for(auto i: r.properties["tags"].toStringList()) {
+                tags[i]++;
+            }
+        }
+    }
+
+    QList<int> tag_values = tags.values();
+    QList<int>::const_iterator it_max = std::max_element(tag_values.constBegin(), tag_values.constEnd());
+    float max = *it_max;
+
+    QStringList links;
+    for(auto it=tags.constBegin(); it != tags.constEnd(); ++it) {
+        // Scale the sizes from 0 to sizes.count - 1
+        float size = static_cast<float>(it.value())/max;
+        links.append(QString("<a href=\"%0\"><span style=\"font-size:%1\">%0</span></a>").arg(it.key(), sizes[static_cast<int>(size*(sizes.length()-1))]));
+    }
+
+    ui->tag_browser->setHtml(links.join(" "));
+    QTextCursor cursor = ui->tag_browser->textCursor();
+    cursor.setPosition(0);
+    ui->tag_browser->setTextCursor(cursor);
 }
 
 void MainWindow::reload_recipelist_selector()
@@ -155,6 +198,7 @@ void MainWindow::reload_recipelists(QStringList rl)
     recipeLists.clear();
     reagents.clear();
     recipelist_model->clear();
+
     for(auto &i: rl) {
         load_recipelist(i);
     }
@@ -433,33 +477,33 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected/*,
     if(selected.length() == 0)
         return;
 
-    for(int i = 0; i < ui->tabWidget->count(); i++) {
-        ui->tabWidget->widget(i)->deleteLater();
+    for(int i = 0; i < ui->main_tabWidget->count(); i++) {
+        ui->main_tabWidget->widget(i)->deleteLater();
     }
 
-    ui->tabWidget->clear();
+    ui->main_tabWidget->clear();
     Reagent* r = selected.indexes()[0].data(Qt::UserRole+1).value<Reagent*>();
-    ui->groupBox->setTitle(r->name);
+    ui->main_groupbox->setTitle(r->name);
 
     if(r->ingredients.length() > 0) {
         QWidget* ing=create_ingredient_tab(r);
-        ui->tabWidget->addTab(ing, tr("&Ingredients"));
+        ui->main_tabWidget->addTab(ing, tr("&Ingredients"));
         QWidget* dir=create_directions_tab(r);
-        ui->tabWidget->addTab(dir, tr("&Directions"));
+        ui->main_tabWidget->addTab(dir, tr("&Directions"));
     }
 
     if(r->properties.contains("info") || r->properties.contains("tags")) {
         QWidget* w=create_info_tab(r);
-        ui->tabWidget->addTab(w, tr("I&nformation"));
+        ui->main_tabWidget->addTab(w, tr("I&nformation"));
     }
 
     if(r->properties.contains("sources")) {
         QWidget* w=create_sources_tab(r);
-        ui->tabWidget->addTab(w, tr("&Sources"));
+        ui->main_tabWidget->addTab(w, tr("&Sources"));
     }
 
     QWidget* usedin=create_usedin_tab(r);
-    ui->tabWidget->addTab(usedin, tr("&Used in"));
+    ui->main_tabWidget->addTab(usedin, tr("&Used in"));
 }
 
 void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
@@ -468,17 +512,25 @@ void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
 
     // Find the selected reagent in all recipe lists, case insensitive
     QString reagent = ingredient_table->item(x,y)->text();
+
     QList<QStandardItem*> found_reagents = recipelist_model->findItems(reagent, Qt::MatchFixedString);
 
     if(!found_reagents.empty()) {
-        ui->search_filter->clear(); // Clear the filtering, so we have all the available reagents to select
-        ui->recipelists_selector->setCurrentIndex(0); // Set the recipe list filter to all
-        recipelist_proxy_model->setRecipeList(nullptr);
+        // Try the current list first
+        QModelIndex index = recipelist_proxy_model->mapFromSource(found_reagents[0]->index());
+        if(!index.isValid()) {
+            // Not in current recipe list, try all
+            ui->search_filter->clear(); // Clear the filtering, so we have all the available reagents to select
+            ui->recipelists_selector->setCurrentIndex(0); // Set the recipe list filter to all
+            recipelist_proxy_model->setRecipeList(nullptr);
+        }
 
-        QModelIndex i = recipelist_proxy_model->mapFromSource(found_reagents[0]->index());
+        index = recipelist_proxy_model->mapFromSource(found_reagents[0]->index());
+
         ui->reagent_table->selectionModel()->reset();
-        ui->reagent_table->selectionModel()->select(i, QItemSelectionModel::Select);
-        ui->reagent_table->scrollTo(i);
+        ui->reagent_table->selectionModel()->select(index, QItemSelectionModel::Select);
+        ui->reagent_table->viewport()->update();
+        ui->reagent_table->scrollTo(index);
     } else {
         QMessageBox::information(ingredient_table,tr("Reagent not found"), tr("Reagent %0 was not found in any of your recipe lists").arg(reagent));
     }
@@ -503,6 +555,9 @@ void MainWindow::save_settings()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+    setSetting("general/geometry", saveGeometry());
+    setSetting("general/windowState", saveState());
+
     if (settings_changed) {
         QMessageBox::StandardButton save;
         save = QMessageBox::question(this, tr("Save before quitting?"), tr("Do you want to save modified settings befre exiting?"),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
@@ -554,4 +609,9 @@ void MainWindow::on_actionAbout_Recipe_Manager_triggered()
                                                             "\n"
                                                             "Donations in bitcoins or goon membership are appreciated.\n\n"
                                                             "BTC donation address: %0").arg("1Gzk3F4C4FiMVjTHCCkRuRwqZoCKujtBXd"));
+}
+
+void MainWindow::on_tag_browser_anchorClicked(const QUrl &arg1)
+{
+    ui->search_filter->setText(QString("tag:%0").arg(arg1.toString()));
 }

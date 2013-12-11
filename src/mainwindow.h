@@ -47,8 +47,19 @@ public:
             // We currently are in a group - append the group name to the key
             key = QString("%1/%2").arg(settings.group(), name);
         }
-
         return settings.value(name).value<T>();
+    }
+
+    template <typename T>
+    static void setSetting(const QString& name, const T &value) {
+        QSettings settings{SETTINGS_FILENAME, QSettings::IniFormat};
+        QString key(name);
+        if(settings.group() != "") {
+            // We currently are in a group - append the group name to the key
+            key = QString("%1/%2").arg(settings.group(), name);
+        }
+        settings.setValue(name, value);
+        settings.sync();
     }
 
     enum ReactionStepTypes {StepReagent, StepInstruction, StepHeat, StepIntermediateResult};
@@ -59,6 +70,7 @@ public:
     void save_settings();
     void reload_recipe_list();
     void reload_recipelist_selector();
+    void reload_tag_cloud();
 
 public slots:
     void reload_recipelists(QStringList rl);
@@ -70,10 +82,9 @@ private slots:
     void on_actionAdd_recipe_list_triggered();
     void on_recipelists_selector_currentIndexChanged(int index);
     void on_action_Manage_recipe_lists_triggered();
-
     void on_action_Save_settings_triggered();
-
     void on_actionAbout_Recipe_Manager_triggered();
+    void on_tag_browser_anchorClicked(const QUrl &arg1);
 
 private:
     friend class ManageDialog;
