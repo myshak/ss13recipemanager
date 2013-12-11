@@ -6,16 +6,30 @@
 #include <QStringList>
 #include <QVariant>
 
+
+
 class Reagent
 {
 public:
     Reagent();
 
+    enum StepTypes {Ingredient, Instruction};
+
+    struct ReagentStep
+    {
+        QString name;
+        StepTypes type;
+        QStringList tags;
+    };
+
+    bool contains_ingredient(const QString &r) const;
+    bool matches_tags(const QStringList &tags) const;
+
     QString name;
     QString fromFile;
 
     QString recipelist;
-    QStringList ingredients;
+    QList<ReagentStep> ingredients;
     QHash<QString, QVariant> properties;
 };
 

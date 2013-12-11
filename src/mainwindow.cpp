@@ -113,31 +113,50 @@ void MainWindow::load_recipelist(QString filename)
         r.name = QString::fromStdString(entry["name"].as<std::string>());
         r.fromFile = filename;
 
-        for(YAML::const_iterator it=entry["ingredients"].begin();it!=entry["ingredients"].end();++it) {
-            r.ingredients.append(QString::fromStdString(it->as<std::string>()));
+        for(YAML::const_iterator i_it=entry["ingredients"].begin();i_it!=entry["ingredients"].end();++i_it) {
+            if(i_it->Tag() == "!step") {
+                // Custom instruction text
+                r.ingredients.append({QString::fromStdString(i_it->as<std::string>()), Reagent::Instruction, {}});
+            } else {
+                // Normal reagent
+                QString ingredient = QString::fromStdString(i_it->as<std::string>());
+                QString name = ingredient;
+                QStringList tags;
+
+                // Check if the name has tags in it
+                int tags_start = ingredient.lastIndexOf("@");
+                if(tags_start != -1) {
+                    // Split the name and the tags
+                    name = ingredient.left(tags_start).trimmed();
+                    tags = ingredient.mid(tags_start+1).split(",", QString::SkipEmptyParts);
+                }
+                tags.replaceInStrings(" ","");
+                r.ingredients.append({name, Reagent::Ingredient, tags});
+            }
+
         }
 
-        for(YAML::const_iterator it=entry.begin();it!=entry.end();++it) {
-            if(it->first.as<std::string>() == "ingredients")
+        for(YAML::const_iterator p_it=entry.begin();p_it!=entry.end();++p_it) {
+            if(p_it->first.as<std::string>() == "ingredients")
                 continue;
 
-            if(it->second.IsMap()) {
+            if(p_it->second.IsMap()) {
                 QMap<QString, QVariant> map;
-                for(YAML::const_iterator m_it=it->second.begin();m_it!=it->second.end();++m_it) {
+                for(YAML::const_iterator m_it=p_it->second.begin();m_it!=p_it->second.end();++m_it) {
                     map[QString::fromStdString(m_it->first.as<std::string>())] = QString::fromStdString(m_it->second.as<std::string>());
                 }
-                r.properties[QString::fromStdString(it->first.as<std::string>())] = map;
+                r.properties[QString::fromStdString(p_it->first.as<std::string>())] = map;
 
-            } else if(it->second.IsSequence()){
+            } else if(p_it->second.IsSequence()){
                 QList<QVariant> sequence;
-                for(YAML::const_iterator m_it=it->second.begin();m_it!=it->second.end();++m_it) {
+                for(YAML::const_iterator m_it=p_it->second.begin();m_it!=p_it->second.end();++m_it) {
                     YAML::Node sequence_entry = *m_it;
                     sequence.append(QString::fromStdString(sequence_entry.as<std::string>()));
                 }
-                r.properties[QString::fromStdString(it->first.as<std::string>())] = sequence;
+                r.properties[QString::fromStdString(p_it->first.as<std::string>())] = sequence;
 
             } else {
-                r.properties[QString::fromStdString(it->first.as<std::string>())] = QString::fromStdString(it->second.as<std::string>());
+                r.properties[QString::fromStdString(p_it->first.as<std::string>())] = QString::fromStdString(p_it->second.as<std::string>());
             }
 
         }
@@ -251,7 +270,13 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     layout->addWidget(ingredient_table);
 
     for(auto &i: reagent->ingredients) {
-        QTableWidgetItem *newItem = new QTableWidgetItem(i);
+        if(i.type != Reagent::Ingredient) {
+            // Skip the non-reagent steps
+            continue;
+        }
+
+        // TODO: Add ingredient to data, used when doubleclicking for finding the coorect reagent with the correct tags
+        QTableWidgetItem *newItem = new QTableWidgetItem(i.name);
         ingredient_table->insertRow(ingredient_table->rowCount());
         ingredient_table->setItem(ingredient_table->rowCount()-1, 0, newItem);
     }
@@ -319,7 +344,7 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
 
 
     for(auto &i: reagents) {
-        if(i.ingredients.contains(reagent->name, Qt::CaseInsensitive)) {
+        if(i.contains_ingredient(reagent->name)) {
             QTableWidgetItem *newItem = new QTableWidgetItem(i.name);
             reagent_table->insertRow(reagent_table->rowCount());
             reagent_table->setItem(reagent_table->rowCount()-1, 0, newItem);
@@ -362,23 +387,32 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, in
     if(reagent.ingredients.isEmpty()) {
         reagents_list.append({{reagent,MainWindow::ReactionStepTypes::StepReagent}, level});
     } else {
-        for(auto &ingredient: reagent.ingredients) {
-            Reagent r;
-            for(auto &i: reagents) {
-                if(i.name.compare(ingredient, Qt::CaseInsensitive) == 0) {
-                    r = i;
-                    break;
+        for(auto ingredient: reagent.ingredients) {
+            if(ingredient.type == Reagent::Ingredient) {
+                Reagent r;
+                for(auto i: reagents) {
+                    if(i.name.compare(ingredient.name, Qt::CaseInsensitive) == 0 &&
+                            i.matches_tags(ingredient.tags)) {
+                        r = i;
+                        break;
+                    }
                 }
-            }
 
-            if(!r.name.isEmpty()) {
-                reagents_list.append(gather_reactions(r, level+1));
+                if(!r.name.isEmpty()) {
+                    reagents_list.append(gather_reactions(r, level+1));
 
+                } else {
+                    r.name = ingredient.name;
+                    reagents_list.append({{r,MainWindow::ReactionStepTypes::StepReagent}, level+1});
+                }
             } else {
-                r.name = ingredient;
-                reagents_list.append({{r,MainWindow::ReactionStepTypes::StepReagent}, level+1});
+                Reagent r;
+                r.name = ingredient.name;
+                reagents_list.append({{r, MainWindow::ReactionStepTypes::StepInstruction}, level+1});
             }
         }
+
+        // TODO: Do we need this here if we have the custom heat to step?
         if(reagent.properties.contains("heat_to")) {
             reagents_list.append({{reagent, MainWindow::ReactionStepTypes::StepHeat}, level+1});
         }
@@ -418,8 +452,9 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
             text += QString(tr("Makes: %0")).arg(i.first.first.name);
             break;
         case ReactionStepTypes::StepInstruction:
-            text += QString(tr("Makes: %0")).arg(i.first.first.name);
+            text += QString(tr("Step: %0")).arg(i.first.first.name);
             break;
+        // TODO: May not be needed
         case ReactionStepTypes::StepHeat:
             text += QString(tr("Heat to %0")).arg(i.first.first.properties["heat_to"].toString());
             break;
@@ -510,12 +545,14 @@ void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
 {
     QTableWidget* ingredient_table = static_cast<QTableWidget*>(sender());
 
-    // Find the selected reagent in all recipe lists, case insensitive
     QString reagent = ingredient_table->item(x,y)->text();
 
+    // Find the selected reagent in all recipe lists, case insensitive
     QList<QStandardItem*> found_reagents = recipelist_model->findItems(reagent, Qt::MatchFixedString);
 
     if(!found_reagents.empty()) {
+        // TODO: Check the found_reagents tags, do not use the first that matched the name
+
         // Try the current list first
         QModelIndex index = recipelist_proxy_model->mapFromSource(found_reagents[0]->index());
         if(!index.isValid()) {

@@ -31,8 +31,6 @@ private:
     RecipeList *recipelist;
     int reagentRole = Qt::UserRole + 1;
     QStringList tags;
-
-    bool matchesTags(const Reagent *r) const;
 };
 
 #endif // RECIPELISTPROXYMODEL_H

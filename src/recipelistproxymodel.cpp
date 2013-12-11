@@ -37,26 +37,6 @@ void RecipeListProxyModel::setFilterString(const QString &pattern)
 
     QSortFilterProxyModel::setFilterFixedString(fixed_pattern.join(" ").trimmed());
 }
-bool RecipeListProxyModel::matchesTags(const Reagent* r) const
-{
-    // Not really needed
-    if(tags.isEmpty()) {
-        return true;
-    }
-
-    if(r->properties.contains("tags")) {
-        QStringList reagent_tags = r->properties["tags"].toStringList();
-        for(auto &i: tags) {
-            if(! reagent_tags.contains(i)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    return false;
-}
 
 bool RecipeListProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
@@ -78,7 +58,7 @@ bool RecipeListProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
                     matches = false;
                 }
             }
-            if(tags.isEmpty() || !matchesTags(r)) {
+            if(tags.isEmpty() || !r->matches_tags(tags)) {
                 matches = false;
             }
         }
@@ -93,7 +73,7 @@ bool RecipeListProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
                     matches = false;
                 }
             }
-            if(!tags.isEmpty() && !matchesTags(r)) {
+            if(!tags.isEmpty() && !r->matches_tags(tags)) {
                 matches = false;
             }
         }
