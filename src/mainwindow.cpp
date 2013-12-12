@@ -269,7 +269,7 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
 
     layout->addWidget(ingredient_table);
 
-    for(auto &i: reagent->ingredients) {
+    for(auto i: reagent->ingredients) {
         if(i.type != Reagent::Ingredient) {
             // Skip the non-reagent steps
             continue;
@@ -277,6 +277,7 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
 
         // TODO: Add ingredient to data, used when doubleclicking for finding the coorect reagent with the correct tags
         QTableWidgetItem *newItem = new QTableWidgetItem(i.name);
+        newItem->setData(Qt::UserRole+1, QVariant::fromValue(i));
         ingredient_table->insertRow(ingredient_table->rowCount());
         ingredient_table->setItem(ingredient_table->rowCount()-1, 0, newItem);
     }
@@ -518,6 +519,8 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected/*,
 
     ui->main_tabWidget->clear();
     Reagent* r = selected.indexes()[0].data(Qt::UserRole+1).value<Reagent*>();
+    Q_ASSERT(r);
+
     ui->main_groupbox->setTitle(r->name);
 
     if(r->ingredients.length() > 0) {
@@ -546,23 +549,38 @@ void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
     QTableWidget* ingredient_table = static_cast<QTableWidget*>(sender());
 
     QString reagent = ingredient_table->item(x,y)->text();
+    Reagent::ReagentStep ingredient = ingredient_table->item(x,y)->data(Qt::UserRole+1).value<Reagent::ReagentStep>();
 
-    // Find the selected reagent in all recipe lists, case insensitive
+    // Find the selected reagent by name in all recipe lists, case insensitive
     QList<QStandardItem*> found_reagents = recipelist_model->findItems(reagent, Qt::MatchFixedString);
+    QList<QStandardItem*> current_list_reagents;
 
-    if(!found_reagents.empty()) {
-        // TODO: Check the found_reagents tags, do not use the first that matched the name
+    // Filter reagents matching tags
+    for(QStandardItem* i: found_reagents) {
+        Reagent* r = i->data(Qt::UserRole+1).value<Reagent*>();
 
+        Q_ASSERT(r);
+
+        if(r->matches_tags(ingredient.tags)) {
+            current_list_reagents.append(i);
+        }
+    }
+
+    if(!current_list_reagents.empty()) {
         // Try the current list first
-        QModelIndex index = recipelist_proxy_model->mapFromSource(found_reagents[0]->index());
+        // We use the first reagent that matches the name and tags
+        QModelIndex index = recipelist_proxy_model->mapFromSource(current_list_reagents[0]->index());
+
         if(!index.isValid()) {
             // Not in current recipe list, try all
             ui->search_filter->clear(); // Clear the filtering, so we have all the available reagents to select
             ui->recipelists_selector->setCurrentIndex(0); // Set the recipe list filter to all
             recipelist_proxy_model->setRecipeList(nullptr);
+            index = recipelist_proxy_model->mapFromSource(current_list_reagents[0]->index());
         }
 
-        index = recipelist_proxy_model->mapFromSource(found_reagents[0]->index());
+        // The index must be valid, because we found the reagent in the master recipe list
+        Q_ASSERT(index.isValid());
 
         ui->reagent_table->selectionModel()->reset();
         ui->reagent_table->selectionModel()->select(index, QItemSelectionModel::Select);

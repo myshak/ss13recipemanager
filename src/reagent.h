@@ -34,5 +34,6 @@ public:
 };
 
 Q_DECLARE_METATYPE(Reagent*)
+Q_DECLARE_METATYPE(Reagent::ReagentStep)
 
 #endif // REAGENT_H

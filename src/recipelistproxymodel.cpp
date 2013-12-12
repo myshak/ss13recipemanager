@@ -67,12 +67,15 @@ bool RecipeListProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &so
         QModelIndex source_index = sourceModel()->index(sourceRow, filterKeyColumn(), sourceParent);
         if (source_index.isValid()) {
             Reagent *r = sourceModel()->data(source_index, reagentRole).value<Reagent*>();
-            //assert(r != nullptr);
+
+            Q_ASSERT(r);
+
             if(recipelist) {
                 if(r->recipelist != recipelist->name || r->fromFile != recipelist->filename) {
                     matches = false;
                 }
             }
+
             if(!tags.isEmpty() && !r->matches_tags(tags)) {
                 matches = false;
             }
