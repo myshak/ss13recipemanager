@@ -1,3 +1,11 @@
+v1.3
+ - Add custom steps to directions.
+ - Add tags to ingredients.
+ * Fix scrolling to reagent when the recipe list changed.
+ * Fix word wrapping/resizing in tables.
+ * Correct selecting reagents in the ingredients tab to account for different
+   reagents with the same name but different tags.
+
 v1.2
  - Added tag cloud window.
  - Added saving window state and position.
