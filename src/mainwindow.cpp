@@ -258,14 +258,16 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     QTableWidget* ingredient_table = new QTableWidget(0,1,w);
 
     ingredient_table->setHorizontalHeaderLabels({tr("Ingredient")});
-    ingredient_table->verticalHeader()->setVisible(false);
     ingredient_table->horizontalHeader()->setStretchLastSection(true);
+    ingredient_table->horizontalHeader()->setClickable(false);
     ingredient_table->setShowGrid(false);
     ingredient_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     ingredient_table->setSelectionMode(QAbstractItemView::SingleSelection);
     ingredient_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ingredient_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ingredient_table->verticalHeader()->setVisible(false);
     connect(ingredient_table, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(ingredientlist_selection_doubleclicked(int,int)));
+
 
     layout->addWidget(ingredient_table);
 
@@ -296,6 +298,9 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     }
 
     w->setLayout(layout);
+
+    connect(ingredient_table->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), ingredient_table, SLOT(resizeRowsToContents()));
+    connect(ingredient_table->horizontalHeader(), SIGNAL(geometriesChanged()), ingredient_table, SLOT(resizeRowsToContents()));
 
     return w;
 }
@@ -334,13 +339,15 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
     QTableWidget* reagent_table = new QTableWidget(0,1,w);
 
     reagent_table->setHorizontalHeaderLabels({tr("Ingredient")});
-    reagent_table->verticalHeader()->setVisible(false);
     reagent_table->horizontalHeader()->setStretchLastSection(true);
+    reagent_table->horizontalHeader()->setClickable(false);
     reagent_table->setShowGrid(false);
     reagent_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     reagent_table->setSelectionMode(QAbstractItemView::SingleSelection);
     reagent_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     reagent_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    reagent_table->verticalHeader()->setVisible(false);
+    reagent_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     connect(reagent_table, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(ingredientlist_selection_doubleclicked(int,int)));
 
 
@@ -362,6 +369,9 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
     }
 
     w->setLayout(layout);
+
+    connect(reagent_table->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), reagent_table, SLOT(resizeRowsToContents()));
+    connect(reagent_table->horizontalHeader(), SIGNAL(geometriesChanged()), reagent_table, SLOT(resizeRowsToContents()));
 
     return w;
 }
@@ -432,12 +442,17 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
 
     directions_table->setHorizontalHeaderLabels({tr("Step")});
     directions_table->horizontalHeader()->setStretchLastSection(true);
+    directions_table->horizontalHeader()->setClickable(false);
     directions_table->setShowGrid(false);
     directions_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     directions_table->setSelectionMode(QAbstractItemView::SingleSelection);
     directions_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     directions_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
     directions_table->setShowGrid(true);
+    directions_table->setWordWrap(true);
+    directions_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    directions_table->verticalHeader()->setClickable(false);
+    directions_table->setCornerButtonEnabled(false);
 
     layout->addWidget(directions_table);
 
@@ -472,6 +487,9 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
     }
 
     w->setLayout(layout);
+
+    connect(directions_table->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), directions_table, SLOT(resizeRowsToContents()));
+    connect(directions_table->horizontalHeader(), SIGNAL(geometriesChanged()), directions_table, SLOT(resizeRowsToContents()));
 
     return w;
 }
@@ -517,6 +535,7 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected/*,
         ui->main_tabWidget->widget(i)->deleteLater();
     }
 
+    ui->main_tabWidget->setUpdatesEnabled(false);
     ui->main_tabWidget->clear();
     Reagent* r = selected.indexes()[0].data(Qt::UserRole+1).value<Reagent*>();
     Q_ASSERT(r);
@@ -526,6 +545,7 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected/*,
     if(r->ingredients.length() > 0) {
         QWidget* ing=create_ingredient_tab(r);
         ui->main_tabWidget->addTab(ing, tr("&Ingredients"));
+
         QWidget* dir=create_directions_tab(r);
         ui->main_tabWidget->addTab(dir, tr("&Directions"));
     }
@@ -542,6 +562,8 @@ void MainWindow::reagentlist_selection_changed(const QItemSelection &selected/*,
 
     QWidget* usedin=create_usedin_tab(r);
     ui->main_tabWidget->addTab(usedin, tr("&Used in"));
+
+    ui->main_tabWidget->setUpdatesEnabled(true);
 }
 
 void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
