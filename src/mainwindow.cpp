@@ -691,5 +691,6 @@ void MainWindow::on_actionAbout_Recipe_Manager_triggered()
 
 void MainWindow::on_tag_browser_anchorClicked(const QUrl &arg1)
 {
+    ui->recipelists_selector->setCurrentIndex(0);
     ui->search_filter->setText(QString("tag:%0").arg(arg1.toString()));
 }
