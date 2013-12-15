@@ -75,9 +75,11 @@ public:
 public slots:
     void reload_recipelists(QStringList rl);
 
+
 private slots:
     void reagentlist_selection_changed(const QItemSelection & selected/*, const QItemSelection & deselected*/);
     void ingredientlist_selection_doubleclicked(int x, int y);
+    void reagentlist_select(const QString &reagent, const QModelIndex &model_index);
 
     void on_actionAdd_recipe_list_triggered();
     void on_recipelists_selector_currentIndexChanged(int index);

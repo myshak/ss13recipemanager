@@ -25,7 +25,8 @@ SOURCES += src/main.cpp\
     src/reagent.cpp \
     src/recipelist.cpp \
     src/recipelistproxymodel.cpp \
-    src/managedialog.cpp
+    src/managedialog.cpp \
+    src/textdelegate.cpp
 
 SOURCES += $$files(src/yaml-cpp/src/*.cpp)
 
@@ -34,7 +35,8 @@ HEADERS  += src/mainwindow.h \
     src/reagent.h \
     src/recipelist.h \
     src/recipelistproxymodel.h \
-    src/managedialog.h
+    src/managedialog.h \
+    src/textdelegate.h
 
 HEADERS += $$files(src/yaml-cpp/src/*.h)
 

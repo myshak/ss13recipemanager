@@ -18,6 +18,8 @@
 #include <QPair>
 #include <QMap>
 
+#include "textdelegate.h"
+
 #if 0
 // Strings for lupdate
 QStringList lupdate_unused = {
@@ -266,8 +268,10 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     ingredient_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ingredient_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ingredient_table->verticalHeader()->setVisible(false);
-    connect(ingredient_table, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(ingredientlist_selection_doubleclicked(int,int)));
 
+    TextDelegate *tg = new TextDelegate(ingredient_table);
+    connect(tg, SIGNAL(anchor_clicked(QString, QModelIndex)), this, SLOT(reagentlist_select(QString,QModelIndex)));
+    ingredient_table->setItemDelegate(tg);
 
     layout->addWidget(ingredient_table);
 
@@ -570,8 +574,15 @@ void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
 {
     QTableWidget* ingredient_table = static_cast<QTableWidget*>(sender());
 
-    QString reagent = ingredient_table->item(x,y)->text();
-    Reagent::ReagentStep ingredient = ingredient_table->item(x,y)->data(Qt::UserRole+1).value<Reagent::ReagentStep>();
+    QModelIndex index = ingredient_table->model()->index(x,y);
+    QString reagent = index.data().toString();
+
+    reagentlist_select(reagent, index);
+}
+
+void MainWindow::reagentlist_select(const QString &reagent, const QModelIndex& model_index)
+{
+    Reagent::ReagentStep ingredient = model_index.data(Qt::UserRole+1).value<Reagent::ReagentStep>();
 
     // Find the selected reagent by name in all recipe lists, case insensitive
     QList<QStandardItem*> found_reagents = recipelist_model->findItems(reagent, Qt::MatchFixedString);
@@ -610,7 +621,7 @@ void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
         ui->reagent_table->repaint();
         ui->reagent_table->scrollTo(index);
     } else {
-        QMessageBox::information(ingredient_table,tr("Reagent not found"), tr("Reagent %0 was not found in any of your recipe lists").arg(reagent));
+        QMessageBox::information(this,tr("Reagent not found"), tr("Reagent %0 was not found in any of your recipe lists").arg(reagent));
     }
 }
 
