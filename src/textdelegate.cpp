@@ -48,24 +48,19 @@ bool TextDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const Q
              emit anchor_clicked(anchor, index);
              return true;
          } else {
+            /*
+             // The whole text is considered one block, so we can't list anchors this way
+             for (QTextBlock it = doc.begin(); it != doc.end(); it = it.next()) {
+                 if(it.charFormat().isAnchor()) {
+                     emit anchor_clicked(it.charFormat().anchorHref(), index);
+                     return true;
+                 }
+             }*/
+
              emit anchor_clicked(index.data().toString(), index);
              return true;
          }
-     } /*else if(event->type() == QEvent::MouseMove) {
-         QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-
-         QTextDocument doc;
-         doc.setHtml( index.data().toString() );
-
-         QString anchor = doc.documentLayout()->anchorAt(mouseEvent->pos() - option.rect.topLeft());
-         if(!anchor.isEmpty()) {
-            QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
-         } else {
-             QApplication::restoreOverrideCursor();
-         }
-     }*/
-
-     // Must have ingredient_table->setMouseTracking(true); for mousemove to work
+     }
 
      return false;
 }
