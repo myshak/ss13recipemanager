@@ -17,6 +17,7 @@
 #include <QScrollArea>
 #include <QPair>
 #include <QMap>
+#include <QRegExp>
 
 #include "textdelegate.h"
 
@@ -116,9 +117,33 @@ void MainWindow::load_recipelist(QString filename)
         r.fromFile = filename;
 
         for(YAML::const_iterator i_it=entry["ingredients"].begin();i_it!=entry["ingredients"].end();++i_it) {
+            QString text = QString::fromStdString(i_it->as<std::string>());
+            QString text_clean;
+            QString text_html;
+            Reagent::Ingredients ingredients;
+
             if(i_it->Tag() == "!step") {
                 // Custom instruction text
-                r.ingredients.append({QString::fromStdString(i_it->as<std::string>()), Reagent::Instruction, {}});
+                QRegExp regex("<([^>]*)>");
+                int pos = 0;
+                int prev_pos = 0;
+
+                while ((pos = regex.indexIn(text, pos)) != -1) {
+                    text_clean += text.mid(prev_pos, pos);
+                    text_clean += regex.cap(1);
+
+                    text_html += text.mid(prev_pos, pos);
+                    text_html += QString("$%0$").arg(regex.cap(1));
+
+                    ingredients.append({regex.cap(1), {}});
+
+                    pos += regex.matchedLength();
+                    prev_pos = pos;
+                }
+                text_clean += text.mid(prev_pos);
+                text_html += text.mid(prev_pos);
+
+                r.ingredients.append({text_clean, text_html, ingredients,  Reagent::Instruction});
             } else {
                 // Normal reagent
                 QString ingredient = QString::fromStdString(i_it->as<std::string>());
@@ -133,7 +158,8 @@ void MainWindow::load_recipelist(QString filename)
                     tags = ingredient.mid(tags_start+1).split(",", QString::SkipEmptyParts);
                 }
                 tags.replaceInStrings(" ","");
-                r.ingredients.append({name, Reagent::Ingredient, tags});
+
+                r.ingredients.append({name, name, {{name, tags}}, Reagent::Ingredient});
             }
 
         }
@@ -281,8 +307,7 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
             continue;
         }
 
-        // TODO: Add ingredient to data, used when doubleclicking for finding the coorect reagent with the correct tags
-        QTableWidgetItem *newItem = new QTableWidgetItem(i.name);
+        QTableWidgetItem *newItem = new QTableWidgetItem(i.text_html);
         newItem->setData(Qt::UserRole+1, QVariant::fromValue(i));
         ingredient_table->insertRow(ingredient_table->rowCount());
         ingredient_table->setItem(ingredient_table->rowCount()-1, 0, newItem);
@@ -406,8 +431,8 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, in
             if(ingredient.type == Reagent::Ingredient) {
                 Reagent r;
                 for(auto i: reagents) {
-                    if(i.name.compare(ingredient.name, Qt::CaseInsensitive) == 0 &&
-                            i.matches_tags(ingredient.tags)) {
+                    if(i.name.compare(ingredient.ingredients[0].name, Qt::CaseInsensitive) == 0 &&
+                            i.matches_tags(ingredient.ingredients[0].tags)) {
                         r = i;
                         break;
                     }
@@ -417,12 +442,12 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, in
                     reagents_list.append(gather_reactions(r, level+1));
 
                 } else {
-                    r.name = ingredient.name;
+                    r.name = ingredient.ingredients[0].name;
                     reagents_list.append({{r,MainWindow::ReactionStepTypes::StepReagent}, level+1});
                 }
             } else {
                 Reagent r;
-                r.name = ingredient.name;
+                r.name = ingredient.text_html;
                 reagents_list.append({{r, MainWindow::ReactionStepTypes::StepInstruction}, level+1});
             }
         }
@@ -594,8 +619,11 @@ void MainWindow::reagentlist_select(const QString &reagent, const QModelIndex& m
 
         Q_ASSERT(r);
 
-        if(r->matches_tags(ingredient.tags)) {
-            current_list_reagents.append(i);
+        for(auto ing: ingredient.ingredients) {
+            if(ing.name == reagent )
+                if( r->matches_tags(ing.tags)) {
+                current_list_reagents.append(i);
+            }
         }
     }
 

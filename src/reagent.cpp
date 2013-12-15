@@ -7,8 +7,10 @@ Reagent::Reagent()
 bool Reagent::contains_ingredient(const QString &r) const
 {
     for(auto i: ingredients) {
-        if(r.compare(i.name, Qt::CaseInsensitive) == 0) {
-            return true;
+        for(auto j: i.ingredients) {
+            if(r.compare(j.name, Qt::CaseInsensitive) == 0) {
+                return true;
+            }
         }
     }
 

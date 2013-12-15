@@ -15,11 +15,20 @@ public:
 
     enum StepTypes {Ingredient, Instruction};
 
-    struct ReagentStep
+    struct IngredientData
     {
         QString name;
-        StepTypes type;
         QStringList tags;
+    };
+
+    typedef QList<IngredientData> Ingredients;
+
+    struct ReagentStep
+    {
+        QString text_plain;
+        QString text_html;
+        Ingredients ingredients; // Wrong name, maybe alternatives?
+        StepTypes type;
     };
 
     bool contains_ingredient(const QString &r) const;
