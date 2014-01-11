@@ -472,8 +472,7 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, in
                 }
 
                 if(!r.name.isEmpty()) {
-                    reagents_list.append(gather_reactions(r, level+1));
-
+                    reagents_list = gather_reactions(r, level+1) + reagents_list;
                 } else {
                     r.name = ingredient.ingredients[0].name;
                     reagents_list.append({{r,MainWindow::ReactionStepTypes::StepReagent}, level+1});
@@ -486,9 +485,9 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, in
         }
 
         // TODO: Do we need this here if we have the custom heat to step?
-        if(reagent.properties.contains("heat_to")) {
+        /*if(reagent.properties.contains("heat_to")) {
             reagents_list.append({{reagent, MainWindow::ReactionStepTypes::StepHeat}, level+1});
-        }
+        }*/
         reagents_list.append({{reagent, MainWindow::ReactionStepTypes::StepIntermediateResult}, level+1});
     }
 
