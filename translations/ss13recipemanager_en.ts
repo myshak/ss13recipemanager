@@ -4,37 +4,37 @@
 <context>
     <name>InfoStrings</name>
     <message>
-        <location filename="../src/mainwindow.cpp" line="27"/>
+        <location filename="../src/mainwindow.cpp" line="29"/>
         <source>depletion_rate</source>
         <translation>Depletion rate</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="28"/>
+        <location filename="../src/mainwindow.cpp" line="30"/>
         <source>penetrates_skin</source>
         <translation>Penetrates skin</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="29"/>
+        <location filename="../src/mainwindow.cpp" line="31"/>
         <source>ignition_temp</source>
         <translation>Ignition temperature</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="30"/>
+        <location filename="../src/mainwindow.cpp" line="32"/>
         <source>application_effect</source>
         <translation>Immediate effect upon application</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="31"/>
+        <location filename="../src/mainwindow.cpp" line="33"/>
         <source>overdose_threshold</source>
         <translation>Overdose treshold</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="32"/>
+        <location filename="../src/mainwindow.cpp" line="34"/>
         <source>notes</source>
         <translation>Notes</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="33"/>
+        <location filename="../src/mainwindow.cpp" line="35"/>
         <source>per_cycle</source>
         <translation>Per life cycle</translation>
     </message>
@@ -62,17 +62,17 @@
         <translation>Fi&amp;le</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="175"/>
+        <location filename="../src/mainwindow.ui" line="176"/>
         <source>&amp;About</source>
         <translation>&amp;About</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="181"/>
+        <location filename="../src/mainwindow.ui" line="182"/>
         <source>Wind&amp;ow</source>
         <translation>Wind&amp;ow</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="231"/>
+        <location filename="../src/mainwindow.ui" line="232"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -85,53 +85,63 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="250"/>
+        <location filename="../src/mainwindow.ui" line="251"/>
         <source>&amp;Add recipe list</source>
         <translation>&amp;Add recipe list</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="255"/>
+        <location filename="../src/mainwindow.ui" line="256"/>
         <source>&amp;Manage recipe lists</source>
         <translation>&amp;Manage recipe lists</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="260"/>
+        <location filename="../src/mainwindow.ui" line="261"/>
         <source>&amp;Exit</source>
         <translation>&amp;Exit</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="265"/>
+        <location filename="../src/mainwindow.ui" line="266"/>
         <source>&amp;Save settings</source>
         <translation>&amp;Save settings</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="270"/>
+        <location filename="../src/mainwindow.ui" line="271"/>
         <source>A&amp;bout Recipe Manager</source>
         <translation>A&amp;bout Recipe Manager</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="763"/>
+        <location filename="../src/mainwindow.ui" line="276"/>
+        <source>Inve&amp;rted directions</source>
+        <translation>Inve&amp;rted directions</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.ui" line="281"/>
+        <source>&amp;Options</source>
+        <translation>&amp;Options</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="805"/>
         <source>About Recipe Manager</source>
         <translation>About Recipe Manager</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="734"/>
+        <location filename="../src/mainwindow.cpp" line="776"/>
         <source>Add recipe list</source>
         <translation>Add recipe list</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="65"/>
-        <location filename="../src/mainwindow.cpp" line="269"/>
+        <location filename="../src/mainwindow.cpp" line="69"/>
+        <location filename="../src/mainwindow.cpp" line="276"/>
         <source>All recipe lists</source>
         <translation>All recipe lists</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="154"/>
+        <location filename="../src/mainwindow.cpp" line="161"/>
         <source>Error loading recipe list</source>
         <translation>Error loading recipe list</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="154"/>
+        <location filename="../src/mainwindow.cpp" line="161"/>
         <source>There was an error during loading of:
 %0
 
@@ -142,112 +152,111 @@ p, li { white-space: pre-wrap; }
 %1</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="160"/>
+        <location filename="../src/mainwindow.cpp" line="167"/>
         <source>Recipe list already added</source>
         <translation>Recipe list already added</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="160"/>
+        <location filename="../src/mainwindow.cpp" line="167"/>
         <source>The &apos;%0&apos; recipe list contained in %1 is already present</source>
         <translation>The &apos;%0&apos; recipe list contained in %1 is already present</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="175"/>
+        <location filename="../src/mainwindow.cpp" line="182"/>
         <source>Unnamed recipe list</source>
         <translation>Unnamed recipe list</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="321"/>
-        <location filename="../src/mainwindow.cpp" line="403"/>
+        <location filename="../src/mainwindow.cpp" line="328"/>
+        <location filename="../src/mainwindow.cpp" line="410"/>
         <source>Ingredient</source>
         <translation>Ingredient</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="355"/>
+        <location filename="../src/mainwindow.cpp" line="362"/>
         <source>Reaction message:
 %0</source>
         <translation>Reaction message:
 %0</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="428"/>
+        <location filename="../src/mainwindow.cpp" line="435"/>
         <source>No uses found.</source>
         <translation>No uses found.</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="505"/>
+        <location filename="../src/mainwindow.cpp" line="568"/>
         <source>Step</source>
         <translation>Step</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="530"/>
+        <location filename="../src/mainwindow.cpp" line="531"/>
         <source>Makes: %0</source>
         <translation>Makes: %0</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="533"/>
+        <location filename="../src/mainwindow.cpp" line="537"/>
         <source>Step: %0</source>
         <translation>Step: %0</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="690"/>
+        <location filename="../src/mainwindow.cpp" line="727"/>
         <source>Item not found</source>
         <translation>Item not found</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="690"/>
+        <location filename="../src/mainwindow.cpp" line="727"/>
         <source>Item %0 was not found in any of your recipe lists</source>
         <translation>Item %0 was not found in any of your recipe lists</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="350"/>
-        <location filename="../src/mainwindow.cpp" line="537"/>
+        <location filename="../src/mainwindow.cpp" line="357"/>
         <source>Heat to %0</source>
         <translation>Heat to %0</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="206"/>
-        <location filename="../src/mainwindow.cpp" line="584"/>
+        <location filename="../src/mainwindow.ui" line="207"/>
+        <location filename="../src/mainwindow.cpp" line="621"/>
         <source>Tags</source>
         <translation>Tags</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="609"/>
+        <location filename="../src/mainwindow.cpp" line="646"/>
         <source>&amp;Ingredients</source>
         <translation>&amp;Ingredients</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="612"/>
+        <location filename="../src/mainwindow.cpp" line="649"/>
         <source>&amp;Directions</source>
         <translation>&amp;Directions</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="617"/>
+        <location filename="../src/mainwindow.cpp" line="654"/>
         <source>I&amp;nformation</source>
         <translation>I&amp;nformation</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="622"/>
+        <location filename="../src/mainwindow.cpp" line="659"/>
         <source>&amp;Sources</source>
         <translation>&amp;Sources</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="626"/>
+        <location filename="../src/mainwindow.cpp" line="663"/>
         <source>&amp;Used in</source>
         <translation>&amp;Used in</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="718"/>
+        <location filename="../src/mainwindow.cpp" line="758"/>
         <source>Save before quitting?</source>
         <translation>Save before quitting?</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="718"/>
+        <location filename="../src/mainwindow.cpp" line="758"/>
         <source>Do you want to save modified settings befre exiting?</source>
         <translation>Do you want to save modified settings befre exiting?</translation>
     </message>
     <message utf8="true">
-        <location filename="../src/mainwindow.cpp" line="763"/>
+        <location filename="../src/mainwindow.cpp" line="805"/>
         <source>Recipe Manager
 © 2013 by mysha (mysha@mysha.cu.cc)
 
@@ -273,6 +282,25 @@ BTC donation address: %0</translation>
         <location filename="../src/managedialog.ui" line="29"/>
         <source>&amp;Remove</source>
         <translation>&amp;Remove</translation>
+    </message>
+</context>
+<context>
+    <name>Options</name>
+    <message>
+        <location filename="../src/optionsdialog.ui" line="14"/>
+        <location filename="../src/optionsdialog.ui" line="20"/>
+        <source>Options</source>
+        <translation>Options</translation>
+    </message>
+    <message>
+        <location filename="../src/optionsdialog.ui" line="32"/>
+        <source>Direction indentation</source>
+        <translation>Direction indentation</translation>
+    </message>
+    <message>
+        <location filename="../src/optionsdialog.ui" line="61"/>
+        <source>Inverted directions</source>
+        <translation>Inverted directions</translation>
     </message>
 </context>
 </TS>

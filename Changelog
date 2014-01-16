@@ -1,3 +1,9 @@
+v1.4
+ - Added an options window
+ - Added the option to invert the directions tab
+ - Made it possible to change the directions indentation size
+ * Fixed the directions tab incorrect reagent grouping
+
 v1.3
  - Add the possibility of multiple alternatives when specyfing ingredients.
  - Add custom steps to directions.
