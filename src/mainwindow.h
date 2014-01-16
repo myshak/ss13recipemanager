@@ -6,6 +6,7 @@
 #include <QStandardItemModel>
 #include <QStringList>
 #include <QList>
+#include <QTableWidget>
 
 #include "managedialog.h"
 #include "reagent.h"
@@ -63,7 +64,14 @@ public:
     }
 
     enum ReactionStepTypes {StepReagent, StepInstruction, StepHeat, StepIntermediateResult};
-    typedef QPair<QPair<Reagent, MainWindow::ReactionStepTypes>, int> ReactionStep;
+
+    typedef struct ReactionStep
+    {
+        QString reagent_name;
+        QVariant entry;
+        ReactionStepTypes type;
+        int total_depth;
+    } ReactionStep;
 
     void load_saved_recipelists();
     void load_recipelist(QString filename);
@@ -99,13 +107,15 @@ private:
     QList<RecipeList> recipeLists;
     QList<Reagent> reagents;
 
-    QList<ReactionStep>  gather_reactions(Reagent reagent, int level=0);
-
     QWidget *create_ingredient_tab(const Reagent *reagent);
     QWidget *create_info_tab(const Reagent *reagent);
     QWidget *create_directions_tab(const Reagent *reagent);
     QWidget *create_usedin_tab(const Reagent *reagent);
     QWidget *create_sources_tab(const Reagent *reagent);
+
+    ReactionStep gather_reactions(Reagent reagent);
+    void fill_directions(QTableWidget *table, ReactionStep step, int current_depth = 0);
 };
 
+Q_DECLARE_METATYPE(QList<MainWindow::ReactionStep>)
 #endif // MAINWINDOW_H

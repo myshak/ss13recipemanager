@@ -8,7 +8,6 @@
 #include <QDebug>
 #include <QLabel>
 #include <QCloseEvent>
-#include <QTableWidget>
 #include <QMessageBox>
 #include <QFormLayout>
 #include <QVBoxLayout>
@@ -440,26 +439,21 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
 
 bool ReactionListLessThan(const MainWindow::ReactionStep &s1, const MainWindow::ReactionStep &s2)
 {
-    return s1.second > s2.second;
+    return s1.total_depth > s2.total_depth;
 }
 
-QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, int level)
+MainWindow::ReactionStep MainWindow::gather_reactions(Reagent reagent)
 {
-    /*
-     * QList of:
-     * QPair:
-     *   QPair:
-     *     reagent name
-     *     step type  - StepReagent - normal reagent
-     *                  StepIntermediateResult - reaction result
-     *                  StepInstruction - instructions
-     *   reaction level - higher = must be made first
-    */
     QList<ReactionStep> reagents_list;
+    ReactionStep step;
+    int depth=0;
+    int sub_max_depth=0;
 
-    if(reagent.ingredients.isEmpty()) {
-        reagents_list.append({{reagent,MainWindow::ReactionStepTypes::StepReagent}, level});
-    } else {
+    step = {reagent.name, {}, ReactionStepTypes::StepReagent, depth};
+
+    if(!reagent.ingredients.isEmpty()) {
+        depth++;
+        step.type = ReactionStepTypes::StepIntermediateResult;
         for(auto ingredient: reagent.ingredients) {
             if(ingredient.type == Reagent::Ingredient) {
                 Reagent r;
@@ -472,28 +466,58 @@ QList<MainWindow::ReactionStep> MainWindow::gather_reactions(Reagent reagent, in
                 }
 
                 if(!r.name.isEmpty()) {
-                    reagents_list = gather_reactions(r, level+1) + reagents_list;
+                    ReactionStep new_step = gather_reactions(r);
+                    if(sub_max_depth < new_step.total_depth) {
+                        sub_max_depth = new_step.total_depth;
+                    }
+                    reagents_list.append(new_step);
                 } else {
-                    r.name = ingredient.ingredients[0].name;
-                    reagents_list.append({{r,MainWindow::ReactionStepTypes::StepReagent}, level+1});
+                    reagents_list.append({ingredient.ingredients[0].name, {}, ReactionStepTypes::StepReagent, 0});
                 }
             } else {
-                Reagent r;
-                r.name = ingredient.text_plain;
-                reagents_list.append({{r, MainWindow::ReactionStepTypes::StepInstruction}, level+1});
+                reagents_list.append({ingredient.text_plain, {}, ReactionStepTypes::StepInstruction, 0});
             }
         }
 
-        // TODO: Do we need this here if we have the custom heat to step?
-        /*if(reagent.properties.contains("heat_to")) {
-            reagents_list.append({{reagent, MainWindow::ReactionStepTypes::StepHeat}, level+1});
-        }*/
-        reagents_list.append({{reagent, MainWindow::ReactionStepTypes::StepIntermediateResult}, level+1});
+        step.entry.setValue(reagents_list);
+        step.total_depth = depth + sub_max_depth;
     }
 
-    return reagents_list;
+    return step;
 }
 
+void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int current_depth)
+{
+    if(!step.entry.isNull()) {
+        auto steps = step.entry.value<QList<ReactionStep>>();
+        qStableSort(steps.begin(),steps.end(), ReactionListLessThan);
+        for(auto i: steps) {
+            fill_directions(table, i, current_depth + 1);
+        }
+    }
+
+    QColor color = StepColors[step.type];
+    QString text = QString((current_depth)*3, ' ');
+
+    switch(step.type) {
+    case ReactionStepTypes::StepIntermediateResult:
+        text += QString(tr("Makes: %0")).arg(step.reagent_name);
+        break;
+    case ReactionStepTypes::StepInstruction:
+        text += QString(tr("Step: %0")).arg(step.reagent_name);
+        break;
+    case ReactionStepTypes::StepReagent:
+    default:
+        text += step.reagent_name;
+        break;
+    }
+
+    QTableWidgetItem *newItem = new QTableWidgetItem(text);
+    newItem->setBackgroundColor(color);
+    table->insertRow(table->rowCount());
+    table->setItem(table->rowCount()-1, 0, newItem);
+
+}
 
 QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
 {
@@ -518,34 +542,8 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
     layout->addWidget(directions_table);
 
     auto reaction_list = gather_reactions(*reagent);
-    qStableSort(reaction_list.begin(),reaction_list.end(), ReactionListLessThan);
 
-    for(auto &i: reaction_list) {
-        QColor color = StepColors[i.first.second];
-        QString text = QString((i.second-1)*3, ' ');
-
-        switch(i.first.second) {
-        case ReactionStepTypes::StepIntermediateResult:
-            text += QString(tr("Makes: %0")).arg(i.first.first.name);
-            break;
-        case ReactionStepTypes::StepInstruction:
-            text += QString(tr("Step: %0")).arg(i.first.first.name);
-            break;
-        // TODO: May not be needed
-        case ReactionStepTypes::StepHeat:
-            text += QString(tr("Heat to %0")).arg(i.first.first.properties["heat_to"].toString());
-            break;
-        case ReactionStepTypes::StepReagent:
-        default:
-            text += i.first.first.name;
-            break;
-        }
-
-        QTableWidgetItem *newItem = new QTableWidgetItem(text);
-        newItem->setBackgroundColor(color);
-        directions_table->insertRow(directions_table->rowCount());
-        directions_table->setItem(directions_table->rowCount()-1, 0, newItem);
-    }
+    fill_directions(directions_table, reaction_list);
 
     w->setLayout(layout);
 
