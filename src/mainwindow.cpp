@@ -292,18 +292,6 @@ void MainWindow::reload_recipelists(QStringList rl)
     settings_changed = true;
 }
 
-void MainWindow::set_indentation(int level)
-{
-    settings_changed = true;
-    indentation_level = level;
-}
-
-void MainWindow::set_inverted(bool inv)
-{
-    settings_changed = true;
-    directions_inverted = inv;
-}
-
 void MainWindow::reload_recipe_list()
 {
     recipelist_model->clear();
@@ -832,4 +820,18 @@ void MainWindow::on_action_Options_triggered()
     QObject::connect(options, SIGNAL(indentation_changed(int)), this, SLOT(set_indentation(int)));
     QObject::connect(options, SIGNAL(inverted_changed(bool)), this, SLOT(set_inverted(bool)));
     options->exec();
+}
+
+void MainWindow::set_indentation(int level)
+{
+    settings_changed = true;
+    indentation_level = level;
+    reagentlist_selection_changed(ui->reagent_table->selectionModel()->selection());
+}
+
+void MainWindow::set_inverted(bool inv)
+{
+    settings_changed = true;
+    directions_inverted = inv;
+    reagentlist_selection_changed(ui->reagent_table->selectionModel()->selection());
 }
