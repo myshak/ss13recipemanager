@@ -8,7 +8,6 @@
 #include <QList>
 #include <QTableWidget>
 
-#include "managedialog.h"
 #include "reagent.h"
 #include "recipelist.h"
 #include "recipelistproxymodel.h"
@@ -42,13 +41,13 @@ public:
     ~MainWindow();
 
     template <typename T>
-    static T getSetting(const QString& name, const QSettings &settings = QSettings(SETTINGS_FILENAME, QSettings::IniFormat)) {
+    static T getSetting(const QString& name, QVariant default_value={}, const QSettings &settings = QSettings(SETTINGS_FILENAME, QSettings::IniFormat)) {
         QString key(name);
         if(settings.group() != "") {
             // We currently are in a group - append the group name to the key
             key = QString("%1/%2").arg(settings.group(), name);
         }
-        return settings.value(name).value<T>();
+        return settings.value(name, default_value).value<T>();
     }
 
     template <typename T>
@@ -82,7 +81,8 @@ public:
 
 public slots:
     void reload_recipelists(QStringList rl);
-
+    void set_indentation(int level);
+    void set_inverted(bool inv);
 
 private slots:
     void reagentlist_selection_changed(const QItemSelection & selected/*, const QItemSelection & deselected*/);
@@ -96,6 +96,8 @@ private slots:
     void on_actionAbout_Recipe_Manager_triggered();
     void on_tag_browser_anchorClicked(const QUrl &arg1);
 
+    void on_action_Options_triggered();
+
 private:
     friend class ManageDialog;
     Ui::MainWindow *ui;
@@ -103,6 +105,8 @@ private:
     RecipeListProxyModel *recipelist_proxy_model;
 
     bool settings_changed = false;
+    int indentation_level;
+    bool directions_inverted;
 
     QList<RecipeList> recipeLists;
     QList<Reagent> reagents;

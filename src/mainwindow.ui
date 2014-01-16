@@ -167,6 +167,7 @@
     <addaction name="actionAdd_recipe_list"/>
     <addaction name="action_Manage_recipe_lists"/>
     <addaction name="separator"/>
+    <addaction name="action_Options"/>
     <addaction name="action_Save_settings"/>
     <addaction name="action_Exit"/>
    </widget>
@@ -268,6 +269,16 @@ p, li { white-space: pre-wrap; }
   <action name="actionAbout_Recipe_Manager">
    <property name="text">
     <string>A&amp;bout Recipe Manager</string>
+   </property>
+  </action>
+  <action name="actionInve_rted_directions">
+   <property name="text">
+    <string>Inve&amp;rted directions</string>
+   </property>
+  </action>
+  <action name="action_Options">
+   <property name="text">
+    <string>&amp;Options</string>
    </property>
   </action>
  </widget>

@@ -26,7 +26,8 @@ SOURCES += src/main.cpp\
     src/recipelist.cpp \
     src/recipelistproxymodel.cpp \
     src/managedialog.cpp \
-    src/textdelegate.cpp
+    src/textdelegate.cpp \
+    src/optionsdialog.cpp
 
 SOURCES += $$files(src/yaml-cpp/src/*.cpp)
 
@@ -36,12 +37,14 @@ HEADERS  += src/mainwindow.h \
     src/recipelist.h \
     src/recipelistproxymodel.h \
     src/managedialog.h \
-    src/textdelegate.h
+    src/textdelegate.h \
+    src/optionsdialog.h
 
 HEADERS += $$files(src/yaml-cpp/src/*.h)
 
 FORMS    += src/mainwindow.ui \
-    src/managedialog.ui
+    src/managedialog.ui \
+    src/optionsdialog.ui
 
 TRANSLATIONS = \
     translations/ss13recipemanager_en.ts

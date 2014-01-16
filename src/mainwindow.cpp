@@ -20,6 +20,9 @@
 
 #include "textdelegate.h"
 
+#include "managedialog.h"
+#include "optionsdialog.h"
+
 #if 0
 // Strings for lupdate
 QStringList lupdate_unused = {
@@ -48,7 +51,9 @@ static const QMap<MainWindow::ReactionStepTypes, QColor> StepColors = init_StepC
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    indentation_level(3),
+    directions_inverted(false)
 {
     ui->setupUi(this);
 
@@ -70,6 +75,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     restoreGeometry(getSetting<QByteArray>("general/geometry"));
     restoreState(getSetting<QByteArray>("general/windowState"));
+
+    indentation_level = getSetting<int>("general/indentation_level", 3);
+    directions_inverted = getSetting<bool>("general/directions_inverted", false);
 
     load_saved_recipelists();
 }
@@ -284,6 +292,18 @@ void MainWindow::reload_recipelists(QStringList rl)
     settings_changed = true;
 }
 
+void MainWindow::set_indentation(int level)
+{
+    settings_changed = true;
+    indentation_level = level;
+}
+
+void MainWindow::set_inverted(bool inv)
+{
+    settings_changed = true;
+    directions_inverted = inv;
+}
+
 void MainWindow::reload_recipe_list()
 {
     recipelist_model->clear();
@@ -439,6 +459,21 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
 
 bool ReactionListLessThan(const MainWindow::ReactionStep &s1, const MainWindow::ReactionStep &s2)
 {
+    //The instruction steps must be always at the bottom
+    if(s1.type == MainWindow::ReactionStepTypes::StepInstruction)
+        return false;
+    if(s2.type == MainWindow::ReactionStepTypes::StepInstruction)
+        return true;
+    return s1.total_depth < s2.total_depth;
+}
+
+bool ReactionListGreaterThan(const MainWindow::ReactionStep &s1, const MainWindow::ReactionStep &s2)
+{
+    //The instruction steps must be always at the bottom
+    if(s1.type == MainWindow::ReactionStepTypes::StepInstruction)
+        return false;
+    if(s2.type == MainWindow::ReactionStepTypes::StepInstruction)
+        return true;
     return s1.total_depth > s2.total_depth;
 }
 
@@ -488,20 +523,27 @@ MainWindow::ReactionStep MainWindow::gather_reactions(Reagent reagent)
 
 void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int current_depth)
 {
-    if(!step.entry.isNull()) {
-        auto steps = step.entry.value<QList<ReactionStep>>();
-        qStableSort(steps.begin(),steps.end(), ReactionListLessThan);
-        for(auto i: steps) {
-            fill_directions(table, i, current_depth + 1);
+    if(!directions_inverted) {
+        if(!step.entry.isNull()) {
+            auto steps = step.entry.value<QList<ReactionStep>>();
+            qStableSort(steps.begin(),steps.end(), ReactionListGreaterThan);
+
+            for(auto i: steps) {
+                fill_directions(table, i, current_depth + 1);
+            }
         }
     }
 
     QColor color = StepColors[step.type];
-    QString text = QString((current_depth)*3, ' ');
+    QString text = QString((current_depth)*indentation_level, ' ');
 
     switch(step.type) {
     case ReactionStepTypes::StepIntermediateResult:
-        text += QString(tr("Makes: %0")).arg(step.reagent_name);
+        if(!directions_inverted) {
+            text += QString(tr("Makes: %0")).arg(step.reagent_name);
+        } else {
+            text += QString("%0:").arg(step.reagent_name);
+        }
         break;
     case ReactionStepTypes::StepInstruction:
         text += QString(tr("Step: %0")).arg(step.reagent_name);
@@ -516,6 +558,16 @@ void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int cur
     newItem->setBackgroundColor(color);
     table->insertRow(table->rowCount());
     table->setItem(table->rowCount()-1, 0, newItem);
+
+    if(directions_inverted) {
+        if(!step.entry.isNull()) {
+            auto steps = step.entry.value<QList<ReactionStep>>();
+            qStableSort(steps.begin(),steps.end(), ReactionListLessThan);
+            for(auto i: steps) {
+                fill_directions(table, i, current_depth + 1);
+            }
+        }
+    }
 
 }
 
@@ -699,6 +751,9 @@ void MainWindow::save_settings()
     }
     settings.endArray();
 
+    settings.setValue("general/indentation_level", indentation_level);
+    settings.setValue("general/directions_inverted", directions_inverted);
+
     settings.sync();
 
     settings_changed = false;
@@ -715,6 +770,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
         save = QMessageBox::question(this, tr("Save before quitting?"), tr("Do you want to save modified settings befre exiting?"),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
         if(save == QMessageBox::Yes) {
             save_settings();
+            setSetting("general/geometry", saveGeometry());
+            setSetting("general/windowState", saveState());
             event->accept();
         } else if (save == QMessageBox::Cancel) {
             event->ignore();
@@ -767,4 +824,12 @@ void MainWindow::on_tag_browser_anchorClicked(const QUrl &arg1)
 {
     ui->recipelists_selector->setCurrentIndex(0);
     ui->search_filter->setText(QString("tag:%0").arg(arg1.toString()));
+}
+
+void MainWindow::on_action_Options_triggered()
+{
+    OptionsDialog* options = new OptionsDialog(indentation_level, directions_inverted, this);
+    QObject::connect(options, SIGNAL(indentation_changed(int)), this, SLOT(set_indentation(int)));
+    QObject::connect(options, SIGNAL(inverted_changed(bool)), this, SLOT(set_inverted(bool)));
+    options->exec();
 }
