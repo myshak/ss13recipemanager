@@ -481,8 +481,9 @@ MainWindow::ReactionStep MainWindow::gather_reactions(Reagent reagent)
             if(ingredient.type == Reagent::Ingredient) {
                 Reagent r;
                 for(auto i: reagents) {
-                    if(i.name.compare(ingredient.text_plain, Qt::CaseInsensitive) == 0 &&
-                            i.matches_tags(ingredient.ingredients[0].tags)) {
+                    if((i.name.compare(ingredient.text_plain, Qt::CaseInsensitive) == 0 ||
+                       (i.name.compare(ingredient.ingredients[0].name, Qt::CaseInsensitive) == 0)) &&
+                        i.matches_tags(ingredient.ingredients[0].tags)) {
                         r = i;
                         break;
                     }
