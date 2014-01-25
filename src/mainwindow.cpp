@@ -169,67 +169,73 @@ void MainWindow::load_recipelist(QString filename)
         }
     }
 
-    rl.name = QString::fromStdString(list["name"].as<std::string>());
-    recipeLists.append(rl);
+    try {
 
-    for(YAML::const_iterator it=list["recipes"].begin();it!=list["recipes"].end();++it) {
-        YAML::Node entry = *it;
-        Reagent r;
+        rl.name = QString::fromStdString(list["name"].as<std::string>());
+        recipeLists.append(rl);
 
-        if(list["name"]) {
-            r.recipelist = QString::fromStdString(list["name"].as<std::string>());
-        } else {
-            r.recipelist = tr("Unnamed recipe list");
-        }
+        for(YAML::const_iterator it=list["recipes"].begin();it!=list["recipes"].end();++it) {
+            YAML::Node entry = *it;
+            Reagent r;
 
-        r.name = QString::fromStdString(entry["name"].as<std::string>());
-        r.fromFile = filename;
-
-        for(YAML::const_iterator i_it=entry["ingredients"].begin();i_it!=entry["ingredients"].end();++i_it) {
-            QString text = QString::fromStdString(i_it->as<std::string>());
-
-
-            if(i_it->Tag() == "!step") {
-                // Custom instruction text
-                Reagent::ReagentStep step = get_reagent_step(text);
-                step.type = Reagent::Instruction;
-                r.ingredients.append(step);
+            if(list["name"]) {
+                r.recipelist = QString::fromStdString(list["name"].as<std::string>());
             } else {
-                // Normal reagent
-                Reagent::ReagentStep step=get_reagent_step(text);
-                step.type = Reagent::Ingredient;
-
-                r.ingredients.append(step);
+                r.recipelist = tr("Unnamed recipe list");
             }
 
-        }
+            r.name = QString::fromStdString(entry["name"].as<std::string>());
+            r.fromFile = filename;
 
-        for(YAML::const_iterator p_it=entry.begin();p_it!=entry.end();++p_it) {
-            if(p_it->first.as<std::string>() == "ingredients")
-                continue;
+            for(YAML::const_iterator i_it=entry["ingredients"].begin();i_it!=entry["ingredients"].end();++i_it) {
+                QString text = QString::fromStdString(i_it->as<std::string>());
 
-            if(p_it->second.IsMap()) {
-                QMap<QString, QVariant> map;
-                for(YAML::const_iterator m_it=p_it->second.begin();m_it!=p_it->second.end();++m_it) {
-                    map[QString::fromStdString(m_it->first.as<std::string>())] = QString::fromStdString(m_it->second.as<std::string>());
+
+                if(i_it->Tag() == "!step") {
+                    // Custom instruction text
+                    Reagent::ReagentStep step = get_reagent_step(text);
+                    step.type = Reagent::Instruction;
+                    r.ingredients.append(step);
+                } else {
+                    // Normal reagent
+                    Reagent::ReagentStep step=get_reagent_step(text);
+                    step.type = Reagent::Ingredient;
+
+                    r.ingredients.append(step);
                 }
-                r.properties[QString::fromStdString(p_it->first.as<std::string>())] = map;
 
-            } else if(p_it->second.IsSequence()){
-                QList<QVariant> sequence;
-                for(YAML::const_iterator m_it=p_it->second.begin();m_it!=p_it->second.end();++m_it) {
-                    YAML::Node sequence_entry = *m_it;
-                    sequence.append(QString::fromStdString(sequence_entry.as<std::string>()));
-                }
-                r.properties[QString::fromStdString(p_it->first.as<std::string>())] = sequence;
-
-            } else {
-                r.properties[QString::fromStdString(p_it->first.as<std::string>())] = QString::fromStdString(p_it->second.as<std::string>());
             }
 
-        }
+            for(YAML::const_iterator p_it=entry.begin();p_it!=entry.end();++p_it) {
+                if(p_it->first.as<std::string>() == "ingredients")
+                    continue;
 
-        reagents.append(r);
+                if(p_it->second.IsMap()) {
+                    QMap<QString, QVariant> map;
+                    for(YAML::const_iterator m_it=p_it->second.begin();m_it!=p_it->second.end();++m_it) {
+                        map[QString::fromStdString(m_it->first.as<std::string>())] = QString::fromStdString(m_it->second.as<std::string>());
+                    }
+                    r.properties[QString::fromStdString(p_it->first.as<std::string>())] = map;
+
+                } else if(p_it->second.IsSequence()){
+                    QList<QVariant> sequence;
+                    for(YAML::const_iterator m_it=p_it->second.begin();m_it!=p_it->second.end();++m_it) {
+                        YAML::Node sequence_entry = *m_it;
+                        sequence.append(QString::fromStdString(sequence_entry.as<std::string>()));
+                    }
+                    r.properties[QString::fromStdString(p_it->first.as<std::string>())] = sequence;
+
+                } else {
+                    r.properties[QString::fromStdString(p_it->first.as<std::string>())] = QString::fromStdString(p_it->second.as<std::string>());
+                }
+
+            }
+
+            reagents.append(r);
+        }
+    } catch(YAML::Exception e) {
+        QMessageBox::critical(this, tr("Error loading recipe list"), tr("There was an error during loading of:\n%0\n\n%1").arg(filename,QString::fromStdString(e.what())));
+        return;
     }
 
     reload_tag_cloud();
