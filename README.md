@@ -4,6 +4,10 @@ Licensed under GPLv3
 
 Copyright 2013 by mysha
 
+Recipe lists
+------------
+You can download the most recent public recipe lists here: http://myshak.github.io/
+
 Running
 -------
 The latest executable version for Windows can be downloaded at https://github.com/myshak/ss13recipemanager/releases/latest
