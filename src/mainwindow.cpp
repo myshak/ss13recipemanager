@@ -677,9 +677,9 @@ void MainWindow::ingredientlist_selection_doubleclicked(int x, int y)
     QTableWidget* ingredient_table = static_cast<QTableWidget*>(sender());
 
     QModelIndex index = ingredient_table->model()->index(x,y);
-    QString reagent = index.data().toString();
+    Reagent::ReagentStep reagent = index.data(Qt::UserRole+1).value<Reagent::ReagentStep>();
 
-    reagentlist_select(reagent, index);
+    reagentlist_select(reagent.ingredients[0].name, index);
 }
 
 void MainWindow::reagentlist_select(const QString &reagent, const QModelIndex& model_index)

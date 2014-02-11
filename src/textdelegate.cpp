@@ -8,6 +8,8 @@
 
 #include <QDebug>
 
+#include "reagent.h"
+
 TextDelegate::TextDelegate(QObject *parent) :
     QStyledItemDelegate(parent)
 {
@@ -57,7 +59,9 @@ bool TextDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const Q
                  }
              }*/
 
-             emit anchor_clicked(index.data().toString(), index);
+             Reagent::ReagentStep reagent = index.data(Qt::UserRole+1).value<Reagent::ReagentStep>();
+
+             emit anchor_clicked(reagent.ingredients[0].name, index);
              return true;
          }
      }
