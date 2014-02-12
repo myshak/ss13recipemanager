@@ -38,6 +38,16 @@
         <source>per_cycle</source>
         <translation>Per life cycle</translation>
     </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="36"/>
+        <source>description</source>
+        <translation>Description</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="37"/>
+        <source>result</source>
+        <translation>Result</translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -120,28 +130,30 @@ p, li { white-space: pre-wrap; }
         <translation>&amp;Options</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="805"/>
+        <location filename="../src/mainwindow.cpp" line="820"/>
         <source>About Recipe Manager</source>
         <translation>About Recipe Manager</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="776"/>
+        <location filename="../src/mainwindow.cpp" line="791"/>
         <source>Add recipe list</source>
         <translation>Add recipe list</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="69"/>
-        <location filename="../src/mainwindow.cpp" line="276"/>
+        <location filename="../src/mainwindow.cpp" line="71"/>
+        <location filename="../src/mainwindow.cpp" line="284"/>
         <source>All recipe lists</source>
         <translation>All recipe lists</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="161"/>
+        <location filename="../src/mainwindow.cpp" line="163"/>
+        <location filename="../src/mainwindow.cpp" line="239"/>
         <source>Error loading recipe list</source>
         <translation>Error loading recipe list</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="161"/>
+        <location filename="../src/mainwindow.cpp" line="163"/>
+        <location filename="../src/mainwindow.cpp" line="239"/>
         <source>There was an error during loading of:
 %0
 
@@ -152,111 +164,111 @@ p, li { white-space: pre-wrap; }
 %1</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="167"/>
+        <location filename="../src/mainwindow.cpp" line="169"/>
         <source>Recipe list already added</source>
         <translation>Recipe list already added</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="167"/>
+        <location filename="../src/mainwindow.cpp" line="169"/>
         <source>The &apos;%0&apos; recipe list contained in %1 is already present</source>
         <translation>The &apos;%0&apos; recipe list contained in %1 is already present</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="182"/>
+        <location filename="../src/mainwindow.cpp" line="186"/>
         <source>Unnamed recipe list</source>
         <translation>Unnamed recipe list</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="328"/>
-        <location filename="../src/mainwindow.cpp" line="410"/>
+        <location filename="../src/mainwindow.cpp" line="342"/>
+        <location filename="../src/mainwindow.cpp" line="424"/>
         <source>Ingredient</source>
         <translation>Ingredient</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="362"/>
+        <location filename="../src/mainwindow.cpp" line="376"/>
         <source>Reaction message:
 %0</source>
         <translation>Reaction message:
 %0</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="435"/>
+        <location filename="../src/mainwindow.cpp" line="449"/>
         <source>No uses found.</source>
         <translation>No uses found.</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="568"/>
+        <location filename="../src/mainwindow.cpp" line="583"/>
         <source>Step</source>
         <translation>Step</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="531"/>
+        <location filename="../src/mainwindow.cpp" line="546"/>
         <source>Makes: %0</source>
         <translation>Makes: %0</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="537"/>
+        <location filename="../src/mainwindow.cpp" line="552"/>
         <source>Step: %0</source>
         <translation>Step: %0</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="727"/>
+        <location filename="../src/mainwindow.cpp" line="742"/>
         <source>Item not found</source>
         <translation>Item not found</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="727"/>
+        <location filename="../src/mainwindow.cpp" line="742"/>
         <source>Item %0 was not found in any of your recipe lists</source>
         <translation>Item %0 was not found in any of your recipe lists</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="357"/>
+        <location filename="../src/mainwindow.cpp" line="371"/>
         <source>Heat to %0</source>
         <translation>Heat to %0</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.ui" line="207"/>
-        <location filename="../src/mainwindow.cpp" line="621"/>
+        <location filename="../src/mainwindow.cpp" line="636"/>
         <source>Tags</source>
         <translation>Tags</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="646"/>
+        <location filename="../src/mainwindow.cpp" line="661"/>
         <source>&amp;Ingredients</source>
         <translation>&amp;Ingredients</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="649"/>
+        <location filename="../src/mainwindow.cpp" line="664"/>
         <source>&amp;Directions</source>
         <translation>&amp;Directions</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="654"/>
+        <location filename="../src/mainwindow.cpp" line="669"/>
         <source>I&amp;nformation</source>
         <translation>I&amp;nformation</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="659"/>
+        <location filename="../src/mainwindow.cpp" line="674"/>
         <source>&amp;Sources</source>
         <translation>&amp;Sources</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="663"/>
+        <location filename="../src/mainwindow.cpp" line="678"/>
         <source>&amp;Used in</source>
         <translation>&amp;Used in</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="758"/>
+        <location filename="../src/mainwindow.cpp" line="773"/>
         <source>Save before quitting?</source>
         <translation>Save before quitting?</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="758"/>
+        <location filename="../src/mainwindow.cpp" line="773"/>
         <source>Do you want to save modified settings befre exiting?</source>
         <translation>Do you want to save modified settings befre exiting?</translation>
     </message>
     <message utf8="true">
-        <location filename="../src/mainwindow.cpp" line="805"/>
+        <location filename="../src/mainwindow.cpp" line="820"/>
         <source>Recipe Manager
 © 2013 by mysha (mysha@mysha.cu.cc)
 

@@ -32,7 +32,9 @@ QT_TRANSLATE_NOOP("InfoStrings","ignition_temp"),
 QT_TRANSLATE_NOOP("InfoStrings","application_effect"),
 QT_TRANSLATE_NOOP("InfoStrings","overdose_threshold"),
 QT_TRANSLATE_NOOP("InfoStrings","notes"),
-QT_TRANSLATE_NOOP("InfoStrings","per_cycle")
+QT_TRANSLATE_NOOP("InfoStrings","per_cycle"),
+QT_TRANSLATE_NOOP("InfoStrings","description"),
+QT_TRANSLATE_NOOP("InfoStrings","result"),
 };
 #endif
 
