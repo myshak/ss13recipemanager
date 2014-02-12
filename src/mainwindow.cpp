@@ -279,10 +279,16 @@ void MainWindow::reload_recipelist_selector()
 {
     ui->recipelists_selector->clear();
 
-    ui->recipelists_selector->addItem(tr("All recipe lists"),QVariant::fromValue<RecipeList*>(nullptr));
+    ui->recipelists_selector->addItem(tr("All recipe lists") + QString(" (%0)").arg(reagents.size()),QVariant::fromValue<RecipeList*>(nullptr));
 
     for(auto &i: recipeLists) {
-        ui->recipelists_selector->addItem(i.name, QVariant::fromValue(&i));
+        int count = 0;
+        for(Reagent &r: reagents) {
+            if( r.fromFile == i.filename && r.recipelist == i.name) {
+                ++count;
+            }
+        }
+        ui->recipelists_selector->addItem(i.name+QString(" (%0)").arg(count), QVariant::fromValue(&i));
     }
 }
 
