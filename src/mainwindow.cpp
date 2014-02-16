@@ -437,6 +437,7 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
     for(auto &i: reagents) {
         if(i.contains_ingredient(reagent->name)) {
             QTableWidgetItem *newItem = new QTableWidgetItem(i.name);
+            newItem->setData(Qt::UserRole+1, QVariant::fromValue(Reagent::ReagentStep{i.name, i.name, {{i.name, i.properties["tags"].toStringList()}}, Reagent::StepTypes::Ingredient}));
             reagent_table->insertRow(reagent_table->rowCount());
             reagent_table->setItem(reagent_table->rowCount()-1, 0, newItem);
         }
