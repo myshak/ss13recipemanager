@@ -1,3 +1,17 @@
+v1.5
+ - Use the first ingredient alternative for the directions tab
+ - More diagnostic messages are shown when the recipe list cannot be
+   parsed
+ - Add item count to recipe list selector combo box
+ - Add Description and Result InfoStrings
+ * Go to the first alternative ingredient when double clicking on an 
+   ingredient (not the link) in the ingredients tab
+ * Steps will be shown as defined in the recipe file, not always at the
+   bottom
+ * Fix going to a reagent from the Used In tab
+ * Fix link color for the selected item in the ingredients tab
+ * Fix QT5 build
+
 v1.4
  - Added an options window
  - Added the option to invert the directions tab
