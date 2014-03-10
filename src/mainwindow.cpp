@@ -476,21 +476,11 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
 
 bool ReactionListLessThan(const MainWindow::ReactionStep &s1, const MainWindow::ReactionStep &s2)
 {
-    //The instruction steps must be always at the bottom
-    if(s1.type == MainWindow::ReactionStepTypes::StepInstruction)
-        return false;
-    if(s2.type == MainWindow::ReactionStepTypes::StepInstruction)
-        return true;
     return s1.total_depth < s2.total_depth;
 }
 
 bool ReactionListGreaterThan(const MainWindow::ReactionStep &s1, const MainWindow::ReactionStep &s2)
 {
-    //The instruction steps must be always at the bottom
-    if(s1.type == MainWindow::ReactionStepTypes::StepInstruction)
-        return false;
-    if(s2.type == MainWindow::ReactionStepTypes::StepInstruction)
-        return true;
     return s1.total_depth > s2.total_depth;
 }
 
