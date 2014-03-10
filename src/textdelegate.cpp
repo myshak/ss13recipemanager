@@ -15,15 +15,18 @@ TextDelegate::TextDelegate(QObject *parent) :
 {
 }
 
-void TextDelegate::paint( QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index ) const
+void TextDelegate::paint( QPainter * painter, const QStyleOptionViewItem & options, const QModelIndex & index ) const
 {
+    //FIXME: doesn't work properly under qt5
+    QStyleOptionViewItemV4 option = options;
+    initStyleOption(&option, index);
+
     painter->save();
     QTextDocument doc;
     doc.setHtml( index.data().toString() );
     QAbstractTextDocumentLayout::PaintContext context;
     doc.setPageSize( option.rect.size());
     painter->translate(option.rect.x(), option.rect.y());
-
 
     if(option.state & QStyle::State_Selected) {
         context.palette.setColor(QPalette::Text, option.palette.highlightedText().color());

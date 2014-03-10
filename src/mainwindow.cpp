@@ -65,7 +65,11 @@ MainWindow::MainWindow(QWidget *parent) :
     recipelist_proxy_model->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
     ui->reagent_table->setModel(recipelist_proxy_model);
+#if QT_VERSION >= 0x050000
+    ui->reagent_table->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+#else
     ui->reagent_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+#endif
 
     ui->splitter->setSizes({300,700});
     ui->recipelists_selector->addItem(tr("All recipe lists"),QVariant::fromValue<RecipeList*>(nullptr));
@@ -341,7 +345,12 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
 
     ingredient_table->setHorizontalHeaderLabels({tr("Ingredient")});
     ingredient_table->horizontalHeader()->setStretchLastSection(true);
+#if QT_VERSION >= 0x050000
+    ingredient_table->horizontalHeader()->setSectionsClickable(false);
+#else
     ingredient_table->horizontalHeader()->setClickable(false);
+#endif
+
     ingredient_table->setShowGrid(false);
     ingredient_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     ingredient_table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -423,14 +432,19 @@ QWidget* MainWindow::create_usedin_tab(const Reagent *reagent)
 
     reagent_table->setHorizontalHeaderLabels({tr("Ingredient")});
     reagent_table->horizontalHeader()->setStretchLastSection(true);
+#if QT_VERSION >= 0x050000
+    reagent_table->horizontalHeader()->setSectionsClickable(false);
+    reagent_table->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+#else
     reagent_table->horizontalHeader()->setClickable(false);
+    reagent_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+#endif
     reagent_table->setShowGrid(false);
     reagent_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     reagent_table->setSelectionMode(QAbstractItemView::SingleSelection);
     reagent_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     reagent_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     reagent_table->verticalHeader()->setVisible(false);
-    reagent_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     connect(reagent_table, SIGNAL(cellDoubleClicked(int,int)), this, SLOT(ingredientlist_selection_doubleclicked(int,int)));
 
 
@@ -583,7 +597,16 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
 
     directions_table->setHorizontalHeaderLabels({tr("Step")});
     directions_table->horizontalHeader()->setStretchLastSection(true);
+
+#if QT_VERSION >= 0x050000
+    directions_table->horizontalHeader()->setSectionsClickable(false);
+    directions_table->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    directions_table->verticalHeader()->setSectionsClickable(false);
+#else
     directions_table->horizontalHeader()->setClickable(false);
+    directions_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    directions_table->verticalHeader()->setClickable(false);
+#endif
     directions_table->setShowGrid(false);
     directions_table->setSelectionBehavior(QAbstractItemView::SelectRows);
     directions_table->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -591,8 +614,6 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
     directions_table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
     directions_table->setShowGrid(true);
     directions_table->setWordWrap(true);
-    directions_table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    directions_table->verticalHeader()->setClickable(false);
     directions_table->setCornerButtonEnabled(false);
 
     layout->addWidget(directions_table);
@@ -614,7 +635,7 @@ QWidget *MainWindow::create_info_tab(const Reagent *reagent)
     QWidget* w = new QWidget();
     QFormLayout* layout = new QFormLayout(w);
     layout->setRowWrapPolicy(QFormLayout::WrapLongRows);
-    layout->setHorizontalSpacing(20);
+    layout->setHorizontalSpacing(20);    
 
     if(reagent->properties.contains("info")) {
         QMap<QString, QVariant> info = reagent->properties["info"].toMap();
@@ -624,7 +645,7 @@ QWidget *MainWindow::create_info_tab(const Reagent *reagent)
             l->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
             l->setAlignment(Qt::AlignTop);
 
-            layout->addRow(QApplication::translate("InfoStrings", it.key().toAscii()), l);
+            layout->addRow(QApplication::translate("InfoStrings", it.key().toLatin1()), l);
         }
     }
 

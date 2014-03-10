@@ -8,7 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QMAKE_CXXFLAGS += -std=c++0x -Wextra
+CONFIG += c++11
+QMAKE_CXXFLAGS += -std=c++11 -Wextra
 
 TARGET = ss13recipes
 TEMPLATE = app
