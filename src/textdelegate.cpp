@@ -17,22 +17,28 @@ TextDelegate::TextDelegate(QObject *parent) :
 
 void TextDelegate::paint( QPainter * painter, const QStyleOptionViewItem & options, const QModelIndex & index ) const
 {
-    //FIXME: doesn't work properly under qt5
     QStyleOptionViewItemV4 option = options;
     initStyleOption(&option, index);
 
     painter->save();
-    QTextDocument doc;
-    doc.setHtml( index.data().toString() );
+
     QAbstractTextDocumentLayout::PaintContext context;
-    doc.setPageSize( option.rect.size());
+
     painter->translate(option.rect.x(), option.rect.y());
 
+    context.palette = option.palette;
+    context.clip = QRect{0, 0, option.rect.width(), option.rect.height()};
+
+    QTextDocument doc;
+    doc.setPageSize( option.rect.size());
+    doc.setTextWidth(option.rect.width());
+
     if(option.state & QStyle::State_Selected) {
-        context.palette.setColor(QPalette::Text, option.palette.highlightedText().color());
-        context.palette.setColor(QPalette::Link, option.palette.highlightedText().color());
-        context.palette.setColor(QPalette::LinkVisited, option.palette.highlightedText().color());
+        context.palette.setColor(QPalette::Text, option.palette.color(QPalette::Active, QPalette::HighlightedText));
+        doc.setDefaultStyleSheet(QString("a {color: %0; }").arg(option.palette.color(QPalette::Active, QPalette::HighlightedText).name()));
     }
+
+    doc.setHtml( index.data().toString() );
 
     doc.documentLayout()->draw(painter, context);
     painter->restore();
@@ -40,19 +46,21 @@ void TextDelegate::paint( QPainter * painter, const QStyleOptionViewItem & optio
 
 bool TextDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
-     if(event->type() == QEvent::MouseButtonDblClick) {
+    (void)model;
 
-         QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+    if(event->type() == QEvent::MouseButtonDblClick) {
 
-         QTextDocument doc;
-         doc.setHtml( index.data().toString() );
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
 
-         QString anchor = doc.documentLayout()->anchorAt(mouseEvent->pos() - option.rect.topLeft());
+        QTextDocument doc;
+        doc.setHtml( index.data().toString() );
 
-         if(!anchor.isEmpty()) {
-             emit anchor_clicked(anchor, index);
-             return true;
-         } else {
+        QString anchor = doc.documentLayout()->anchorAt(mouseEvent->pos() - option.rect.topLeft());
+
+        if(!anchor.isEmpty()) {
+            emit anchor_clicked(anchor, index);
+            return true;
+        } else {
             /*
              // The whole text is considered one block, so we can't list anchors this way
              for (QTextBlock it = doc.begin(); it != doc.end(); it = it.next()) {
@@ -62,12 +70,12 @@ bool TextDelegate::editorEvent(QEvent *event, QAbstractItemModel *model, const Q
                  }
              }*/
 
-             Reagent::ReagentStep reagent = index.data(Qt::UserRole+1).value<Reagent::ReagentStep>();
+            Reagent::ReagentStep reagent = index.data(Qt::UserRole+1).value<Reagent::ReagentStep>();
 
-             emit anchor_clicked(reagent.ingredients[0].name, index);
-             return true;
-         }
-     }
+            emit anchor_clicked(reagent.ingredients[0].name, index);
+            return true;
+        }
+    }
 
-     return false;
+    return false;
 }
