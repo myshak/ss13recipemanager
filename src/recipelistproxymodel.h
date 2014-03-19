@@ -28,7 +28,7 @@ protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
 
 private:
-    RecipeList *recipelist;
+    RecipeList *recipelist = nullptr;
     int reagentRole = Qt::UserRole + 1;
     QStringList tags;
 };

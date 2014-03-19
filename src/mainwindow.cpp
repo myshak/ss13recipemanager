@@ -163,7 +163,7 @@ void MainWindow::load_recipelist(QString filename)
     YAML::Node list;
     try {
         list = YAML::LoadFile(filename.toStdString());
-    } catch(YAML::Exception e) {
+    } catch(YAML::Exception& e) {
         QMessageBox::critical(this, tr("Error loading recipe list"), tr("There was an error during loading of:\n%0\n\n%1").arg(filename,QString::fromStdString(e.what())));
         return;
     }
@@ -239,7 +239,7 @@ void MainWindow::load_recipelist(QString filename)
 
             reagents.append(r);
         }
-    } catch(YAML::Exception e) {
+    } catch(YAML::Exception& e) {
         QMessageBox::critical(this, tr("Error loading recipe list"), tr("There was an error during loading of:\n%0\n\n%1").arg(filename,QString::fromStdString(e.what())));
         return;
     }
@@ -829,7 +829,7 @@ void MainWindow::on_action_Save_settings_triggered()
 void MainWindow::on_actionAbout_Recipe_Manager_triggered()
 {
 
-    QMessageBox::about(this, tr("About Recipe Manager"), trUtf8("Recipe Manager\n© 2013 by mysha (mysha@mysha.cu.cc)\n"
+    QMessageBox::about(this, tr("About Recipe Manager"), trUtf8("Recipe Manager\n© 2013-2014 by mysha (mysha@mysha.cu.cc)\n"
                                                             "\n"
                                                             "Donations in bitcoins or goon membership are appreciated.\n\n"
                                                             "BTC donation address: %0").arg("1Gzk3F4C4FiMVjTHCCkRuRwqZoCKujtBXd"));
