@@ -2,6 +2,7 @@
 #define OPTIONS_H
 
 #include <QDialog>
+#include "mainwindow.h"
 
 namespace Ui {
 class Options;
@@ -12,12 +13,12 @@ class OptionsDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OptionsDialog(int indentation, bool inverted, QWidget *parent = 0);
+    explicit OptionsDialog(int indentation, MainWindow::DirectionsStyle style, QWidget *parent = 0);
     ~OptionsDialog();
 
 signals:
     void indentation_changed(int level);
-    void inverted_changed(bool inv);
+    void directions_style_changed(MainWindow::DirectionsStyle style);
 
 protected:
     void accept();

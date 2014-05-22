@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     indentation_level(3),
-    directions_inverted(false)
+    directions_style(DirectionsStyle::Normal)
 {
     ui->setupUi(this);
 
@@ -83,7 +83,8 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreState(getSetting<QByteArray>("general/windowState"));
 
     indentation_level = getSetting<int>("general/indentation_level", 3);
-    directions_inverted = getSetting<bool>("general/directions_inverted", false);
+    // QVariant.value<enum type>() doesn't seem to work. Cast it from int manually
+    directions_style = static_cast<DirectionsStyle>(getSetting<quint32>("general/directions_style", DirectionsStyle::Normal));
 
     load_saved_recipelists();
 }
@@ -531,7 +532,7 @@ MainWindow::ReactionStep MainWindow::gather_reactions(Reagent reagent)
 
 void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int current_depth)
 {
-    if(!directions_inverted) {
+    if(directions_style == DirectionsStyle::Normal) {
         if(!step.entry.isNull()) {
             auto steps = step.entry.value<QList<ReactionStep>>();
             qStableSort(steps.begin(),steps.end(), ReactionListGreaterThan);
@@ -547,7 +548,7 @@ void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int cur
 
     switch(step.type) {
     case ReactionStepTypes::StepIntermediateResult:
-        if(!directions_inverted) {
+        if(directions_style == DirectionsStyle::Normal) {
             text += QString(tr("Makes: %0")).arg(step.reagent_name);
         } else {
             text += QString("%0:").arg(step.reagent_name);
@@ -567,7 +568,7 @@ void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int cur
     table->insertRow(table->rowCount());
     table->setItem(table->rowCount()-1, 0, newItem);
 
-    if(directions_inverted) {
+    if(directions_style == DirectionsStyle::Inverted) {
         if(!step.entry.isNull()) {
             auto steps = step.entry.value<QList<ReactionStep>>();
             qStableSort(steps.begin(),steps.end(), ReactionListLessThan);
@@ -579,11 +580,42 @@ void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int cur
 
 }
 
-QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
+void MainWindow::fill_directions(QTreeWidgetItem* item, ReactionStep step, int current_depth)
 {
-    QWidget* w = new QWidget();
-    QGridLayout* layout = new QGridLayout(w);
-    QTableWidget* directions_table = new QTableWidget(0,1,w);
+    QColor color = StepColors[step.type];
+    QString text;
+
+    switch(step.type) {
+    case ReactionStepTypes::StepIntermediateResult:
+        text += QString("%0").arg(step.reagent_name);
+        break;
+    case ReactionStepTypes::StepInstruction:
+        text += QString(tr("Step: %0")).arg(step.reagent_name);
+        break;
+    case ReactionStepTypes::StepReagent:
+    default:
+        text += step.reagent_name;
+        break;
+    }
+
+    QTreeWidgetItem *newItem = new QTreeWidgetItem({text});
+    newItem->setBackgroundColor(0, color);
+    item->addChild(newItem);
+
+    if(!step.entry.isNull()) {
+        auto steps = step.entry.value<QList<ReactionStep>>();
+        qStableSort(steps.begin(),steps.end(), ReactionListGreaterThan);
+        for(auto i: steps) {
+            fill_directions(newItem, i, current_depth + 1);
+        }
+    }
+
+
+}
+
+QWidget *MainWindow::create_table_directions(const Reagent* reagent, QWidget* parent)
+{
+    QTableWidget* directions_table = new QTableWidget(0,1,parent);
 
     directions_table->setHorizontalHeaderLabels({tr("Step")});
     directions_table->horizontalHeader()->setStretchLastSection(true);
@@ -606,16 +638,52 @@ QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
     directions_table->setWordWrap(true);
     directions_table->setCornerButtonEnabled(false);
 
-    layout->addWidget(directions_table);
-
     auto reaction_list = gather_reactions(*reagent);
-
     fill_directions(directions_table, reaction_list);
-
-    w->setLayout(layout);
 
     connect(directions_table->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), directions_table, SLOT(resizeRowsToContents()));
     connect(directions_table->horizontalHeader(), SIGNAL(geometriesChanged()), directions_table, SLOT(resizeRowsToContents()));
+
+    return directions_table;
+}
+
+QWidget *MainWindow::create_tree_directions(const Reagent* reagent, QWidget* parent)
+{
+    QTreeWidget* directions_tree = new QTreeWidget(parent);
+
+    directions_tree->setColumnCount(1);
+    directions_tree->setHeaderLabel(tr("Step"));
+#if QT_VERSION >= 0x050000
+    directions_tree->header()->setSectionsClickable(false);
+#else
+    directions_tree->header()->setClickable(false);
+#endif
+    directions_tree->setSelectionBehavior(QAbstractItemView::SelectRows);
+    directions_tree->setSelectionMode(QAbstractItemView::SingleSelection);
+    directions_tree->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    directions_tree->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
+    directions_tree->setWordWrap(true);
+
+    auto reaction_list = gather_reactions(*reagent);
+    fill_directions(directions_tree->invisibleRootItem(), reaction_list);
+
+    directions_tree->expandAll();
+
+    return directions_tree;
+}
+
+QWidget *MainWindow::create_directions_tab(const Reagent* reagent)
+{
+    QWidget* w = new QWidget();
+    QGridLayout* layout = new QGridLayout(w);
+
+    if(directions_style == DirectionsStyle::Tree) {
+        layout->addWidget(create_tree_directions(reagent, w));
+    } else {
+        layout->addWidget(create_table_directions(reagent, w));
+    }
+
+    w->setLayout(layout);
 
     return w;
 }
@@ -767,7 +835,7 @@ void MainWindow::save_settings()
     settings.endArray();
 
     settings.setValue("general/indentation_level", indentation_level);
-    settings.setValue("general/directions_inverted", directions_inverted);
+    settings.setValue("general/directions_style", directions_style);
 
     settings.sync();
 
@@ -843,9 +911,9 @@ void MainWindow::on_tag_browser_anchorClicked(const QUrl &arg1)
 
 void MainWindow::on_action_Options_triggered()
 {
-    OptionsDialog* options = new OptionsDialog(indentation_level, directions_inverted, this);
+    OptionsDialog* options = new OptionsDialog(indentation_level, directions_style, this);
     QObject::connect(options, SIGNAL(indentation_changed(int)), this, SLOT(set_indentation(int)));
-    QObject::connect(options, SIGNAL(inverted_changed(bool)), this, SLOT(set_inverted(bool)));
+    QObject::connect(options, SIGNAL(directions_style_changed(MainWindow::DirectionsStyle)), this, SLOT(set_directions_style(MainWindow::DirectionsStyle)));
     options->exec();
 }
 
@@ -856,9 +924,9 @@ void MainWindow::set_indentation(int level)
     reagentlist_selection_changed(ui->reagent_table->selectionModel()->selection());
 }
 
-void MainWindow::set_inverted(bool inv)
+void MainWindow::set_directions_style(MainWindow::DirectionsStyle style)
 {
     settings_changed = true;
-    directions_inverted = inv;
+    directions_style = style;
     reagentlist_selection_changed(ui->reagent_table->selectionModel()->selection());
 }

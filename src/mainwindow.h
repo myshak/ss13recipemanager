@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <QList>
 #include <QTableWidget>
+#include <QTreeWidget>
 
 #include "reagent.h"
 #include "recipelist.h"
@@ -37,6 +38,13 @@ protected:
     void closeEvent(QCloseEvent *event);
 
 public:
+
+    enum DirectionsStyle {
+        Normal,
+        Inverted,
+        Tree
+    };
+
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -82,7 +90,7 @@ public:
 public slots:
     void reload_recipelists(QStringList rl);
     void set_indentation(int level);
-    void set_inverted(bool inv);
+    void set_directions_style(MainWindow::DirectionsStyle style);
 
 private slots:
     void reagentlist_selection_changed(const QItemSelection & selected/*, const QItemSelection & deselected*/);
@@ -106,10 +114,13 @@ private:
 
     bool settings_changed = false;
     int indentation_level;
-    bool directions_inverted;
+    DirectionsStyle directions_style;
 
     QList<RecipeList> recipeLists;
     QList<Reagent> reagents;
+
+    QWidget *create_tree_directions(const Reagent *reagent, QWidget *parent);
+    QWidget *create_table_directions(const Reagent *reagent, QWidget *parent);
 
     QWidget *create_ingredient_tab(const Reagent *reagent);
     QWidget *create_info_tab(const Reagent *reagent);
@@ -119,7 +130,9 @@ private:
 
     ReactionStep gather_reactions(Reagent reagent);
     void fill_directions(QTableWidget *table, ReactionStep step, int current_depth = 0);
+    void fill_directions(QTreeWidgetItem* item, ReactionStep step, int current_depth = 0);
 };
 
 Q_DECLARE_METATYPE(QList<MainWindow::ReactionStep>)
+Q_DECLARE_METATYPE(MainWindow::DirectionsStyle)
 #endif // MAINWINDOW_H
