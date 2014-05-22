@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>translations/ss13recipemanager_en.qm</file>
+        <file>icons/heat.png</file>
+        <file>icons/reaction.png</file>
     </qresource>
 </RCC>

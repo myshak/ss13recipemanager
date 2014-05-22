@@ -344,6 +344,28 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     QGridLayout* layout = new QGridLayout(w);
     QTableWidget* ingredient_table = new QTableWidget(0,1,w);
 
+    if(reagent->properties.contains("heat_to")) {
+        QLabel* l = new QLabel(QString(R"(<img src=":/icons/heat.png"/> %0)").arg(reagent->properties["heat_to"].toString()));
+        l->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Minimum);
+        l->setFrameShape(QLabel::StyledPanel);
+        l->setStyleSheet("background-color: #FFDCDC;");
+        l->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+        layout->addWidget(l);
+    }
+
+    if(reagent->properties.contains("reaction_message")) {
+        QLabel* l = new QLabel(QString(R"(<img src=":/icons/reaction.png"/> %0)").arg(reagent->properties["reaction_message"].toString()));
+        l->setWordWrap(true);
+        l->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Minimum);
+        l->setAlignment(Qt::AlignTop);
+        l->setFrameShape(QLabel::StyledPanel);
+        l->setStyleSheet("background-color: cornsilk;");
+        l->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+        layout->addWidget(l);
+    }
+
+    layout->addWidget(ingredient_table);
+
     ingredient_table->setHorizontalHeaderLabels({tr("Ingredient")});
     ingredient_table->horizontalHeader()->setStretchLastSection(true);
 #if QT_VERSION >= 0x050000
@@ -363,8 +385,6 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
     connect(tg, SIGNAL(anchor_clicked(QString, QModelIndex)), this, SLOT(reagentlist_select(QString,QModelIndex)));
     ingredient_table->setItemDelegate(tg);
 
-    layout->addWidget(ingredient_table);
-
     for(auto i: reagent->ingredients) {
         if(i.type != Reagent::Ingredient) {
             // Skip the non-reagent steps
@@ -375,19 +395,6 @@ QWidget* MainWindow::create_ingredient_tab(const Reagent *reagent)
         newItem->setData(Qt::UserRole+1, QVariant::fromValue(i));
         ingredient_table->insertRow(ingredient_table->rowCount());
         ingredient_table->setItem(ingredient_table->rowCount()-1, 0, newItem);
-    }
-
-    if(reagent->properties.contains("heat_to")) {
-        QLabel* l = new QLabel(tr("Heat to %0").arg(reagent->properties["heat_to"].toString()));
-        layout->addWidget(l);
-    }
-
-    if(reagent->properties.contains("reaction_message")) {
-        QLabel* l = new QLabel(tr("Reaction message:\n%0").arg(reagent->properties["reaction_message"].toString()));
-        l->setWordWrap(true);
-        l->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
-        l->setAlignment(Qt::AlignTop);
-        layout->addWidget(l);
     }
 
     w->setLayout(layout);
