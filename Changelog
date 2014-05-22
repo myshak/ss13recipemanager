@@ -1,3 +1,7 @@
+v1.6
+ - Added a tree style directions tab
+ - Updated the heat/reaction message labels
+
 v1.5
  - Use the first ingredient alternative for the directions tab
  - More diagnostic messages are shown when the recipe list cannot be
