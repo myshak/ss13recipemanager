@@ -79,12 +79,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->menuWindow->addAction(ui->dockWidget->toggleViewAction());
 
-    restoreGeometry(getSetting<QByteArray>("general/geometry"));
-    restoreState(getSetting<QByteArray>("general/windowState"));
-
-    indentation_level = getSetting<int>("general/indentation_level", 3);
-    // QVariant.value<enum type>() doesn't seem to work. Cast it from int manually
-    directions_style = static_cast<DirectionsStyle>(getSetting<quint32>("general/directions_style", DirectionsStyle::Normal));
+    load_settings();
 
     load_saved_recipelists();
 }
@@ -665,6 +660,8 @@ QWidget *MainWindow::create_tree_directions(const Reagent* reagent, QWidget* par
 #else
     directions_tree->header()->setClickable(false);
 #endif
+    directions_tree->setRootIsDecorated(false);
+    directions_tree->setAnimated(tree_animated);
     directions_tree->setSelectionBehavior(QAbstractItemView::SelectRows);
     directions_tree->setSelectionMode(QAbstractItemView::SingleSelection);
     directions_tree->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -830,6 +827,18 @@ void MainWindow::reagentlist_select(const QString &reagent, const QModelIndex& m
     }
 }
 
+void MainWindow::load_settings()
+{
+    restoreGeometry(getSetting<QByteArray>("general/geometry"));
+    restoreState(getSetting<QByteArray>("general/windowState"));
+
+    indentation_level = getSetting<int>("general/indentation_level", 3);
+    tree_animated = getSetting<bool>("general/tree_animated", false);
+    // QVariant.value<enum type>() doesn't seem to work. Cast it from int manually
+    directions_style = static_cast<DirectionsStyle>(getSetting<quint32>("general/directions_style", DirectionsStyle::Normal));
+
+}
+
 void MainWindow::save_settings()
 {
     QSettings settings(SETTINGS_FILENAME, QSettings::IniFormat);
@@ -843,6 +852,7 @@ void MainWindow::save_settings()
 
     settings.setValue("general/indentation_level", indentation_level);
     settings.setValue("general/directions_style", directions_style);
+    settings.setValue("general/tree_animated", tree_animated);
 
     settings.sync();
 
@@ -857,7 +867,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     if (settings_changed) {
         QMessageBox::StandardButton save;
-        save = QMessageBox::question(this, tr("Save before quitting?"), tr("Do you want to save modified settings befre exiting?"),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+        save = QMessageBox::question(this, tr("Save before quitting?"), tr("Do you want to save modified settings before exiting?"),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
         if(save == QMessageBox::Yes) {
             save_settings();
             setSetting("general/geometry", saveGeometry());
@@ -918,8 +928,9 @@ void MainWindow::on_tag_browser_anchorClicked(const QUrl &arg1)
 
 void MainWindow::on_action_Options_triggered()
 {
-    OptionsDialog* options = new OptionsDialog(indentation_level, directions_style, this);
+    OptionsDialog* options = new OptionsDialog(indentation_level, directions_style, tree_animated, this);
     QObject::connect(options, SIGNAL(indentation_changed(int)), this, SLOT(set_indentation(int)));
+    QObject::connect(options, SIGNAL(tree_animated_changed(bool)), this, SLOT(set_tree_animated(bool)));
     QObject::connect(options, SIGNAL(directions_style_changed(MainWindow::DirectionsStyle)), this, SLOT(set_directions_style(MainWindow::DirectionsStyle)));
     options->exec();
 }
@@ -928,7 +939,18 @@ void MainWindow::set_indentation(int level)
 {
     settings_changed = true;
     indentation_level = level;
-    reagentlist_selection_changed(ui->reagent_table->selectionModel()->selection());
+    if(directions_style != DirectionsStyle::Tree) {
+        reagentlist_selection_changed(ui->reagent_table->selectionModel()->selection());
+    }
+}
+
+void MainWindow::set_tree_animated(bool animated)
+{
+    settings_changed = true;
+    tree_animated = animated;
+    if(directions_style == DirectionsStyle::Tree) {
+        reagentlist_selection_changed(ui->reagent_table->selectionModel()->selection());
+    }
 }
 
 void MainWindow::set_directions_style(MainWindow::DirectionsStyle style)

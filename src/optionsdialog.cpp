@@ -1,7 +1,7 @@
 #include "optionsdialog.h"
 #include "ui_optionsdialog.h"
 
-OptionsDialog::OptionsDialog(int indentation, MainWindow::DirectionsStyle style, QWidget *parent):
+OptionsDialog::OptionsDialog(int indentation, MainWindow::DirectionsStyle style, bool tree_animated, QWidget *parent):
     QDialog(parent),
     ui(new Ui::Options)
 {
@@ -20,6 +20,8 @@ OptionsDialog::OptionsDialog(int indentation, MainWindow::DirectionsStyle style,
         ui->style_tree->setChecked(true);
         break;
     }
+
+    ui->tree_animated->setChecked(tree_animated);
 }
 
 OptionsDialog::~OptionsDialog()
@@ -41,6 +43,8 @@ void OptionsDialog::accept()
     }
 
     emit directions_style_changed(style);
+
+    emit tree_animated_changed(ui->tree_animated->isChecked());
 
     QDialog::accept();
 }

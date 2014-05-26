@@ -82,6 +82,7 @@ public:
 
     void load_saved_recipelists();
     void load_recipelist(QString filename);
+    void load_settings();
     void save_settings();
     void reload_recipe_list();
     void reload_recipelist_selector();
@@ -90,6 +91,7 @@ public:
 public slots:
     void reload_recipelists(QStringList rl);
     void set_indentation(int level);
+    void set_tree_animated(bool animated);
     void set_directions_style(MainWindow::DirectionsStyle style);
 
 private slots:
@@ -113,8 +115,9 @@ private:
     RecipeListProxyModel *recipelist_proxy_model;
 
     bool settings_changed = false;
-    int indentation_level;
-    DirectionsStyle directions_style;
+    int indentation_level = 3;
+    DirectionsStyle directions_style = DirectionsStyle::Normal;
+    bool tree_animated = false;
 
     QList<RecipeList> recipeLists;
     QList<Reagent> reagents;
