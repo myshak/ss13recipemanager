@@ -184,6 +184,11 @@ p, li { white-space: pre-wrap; }
         <source>Ingredient</source>
         <translation>Ingredient</translation>
     </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="860"/>
+        <source>Do you want to save modified settings before exiting?</source>
+        <translation>Do you want to save modified settings before exiting?</translation>
+    </message>
     <message utf8="true">
         <location filename="../src/mainwindow.cpp" line="907"/>
         <source>Recipe Manager
@@ -266,11 +271,6 @@ BTC donation address: %0</translation>
         <location filename="../src/mainwindow.cpp" line="860"/>
         <source>Save before quitting?</source>
         <translation>Save before quitting?</translation>
-    </message>
-    <message>
-        <location filename="../src/mainwindow.cpp" line="860"/>
-        <source>Do you want to save modified settings befre exiting?</source>
-        <translation>Do you want to save modified settings befre exiting?</translation>
     </message>
 </context>
 <context>
