@@ -247,7 +247,8 @@ void MainWindow::load_recipelist(QString filename)
 
 void MainWindow::reload_tag_cloud()
 {
-    static QStringList sizes {"small", "medium", "large", "x-large"};
+    static const float size_min = 7.5f;
+    static const float size_max = 18.0f;
     QMap<QString,int> tags;
 
     ui->tag_browser->clear();
@@ -266,9 +267,9 @@ void MainWindow::reload_tag_cloud()
 
     QStringList links;
     for(auto it=tags.constBegin(); it != tags.constEnd(); ++it) {
-        // Scale the sizes from 0 to sizes.count - 1
-        float size = static_cast<float>(it.value())/max;
-        links.append(QString("<a href=\"%0\"><span style=\"font-size:%1\">%0</span></a>").arg(it.key(), sizes[static_cast<int>(size*(sizes.length()-1))]));
+        // Scale the sizes from size_min to size_max logarithmically
+        float size = ( log(*it) / log(max) ) * (size_max - size_min) + size_min;
+        links.append(QString("<a href=\"%0\"><span style=\"font-size:%1pt\">%0</span></a>").arg(it.key()).arg(static_cast<int>(size)));
     }
 
     ui->tag_browser->setHtml(links.join(" "));
