@@ -699,7 +699,14 @@ QWidget *MainWindow::create_info_tab(const Reagent *reagent)
     QWidget* w = new QWidget();
     QFormLayout* layout = new QFormLayout(w);
     layout->setRowWrapPolicy(QFormLayout::WrapLongRows);
-    layout->setHorizontalSpacing(20);    
+    layout->setHorizontalSpacing(20);
+
+    QLabel *l = new QLabel(reagent->recipelist);
+    l->setWordWrap(true);
+    l->setSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Minimum);
+    l->setAlignment(Qt::AlignTop);
+
+    layout->addRow(tr("Recipe list"), l);
 
     if(reagent->properties.contains("info")) {
         QMap<QString, QVariant> info = reagent->properties["info"].toMap();
