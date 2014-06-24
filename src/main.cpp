@@ -16,9 +16,10 @@ int main(int argc, char *argv[])
     a.installTranslator(&translator);
 
     QFile qss("style.qss");
-    qss.open(QFile::ReadOnly);
-    a.setStyleSheet( QString::fromUtf8(qss.readAll()) );
-    qss.close();
+    if(qss.open(QFile::ReadOnly)) {
+        a.setStyleSheet( QString::fromUtf8(qss.readAll()) );
+        qss.close();
+    }
 
     MainWindow w;
     w.show();
