@@ -603,6 +603,7 @@ void MainWindow::fill_directions(QTreeWidgetItem* item, ReactionStep step, int c
 
     QTreeWidgetItem *newItem = new QTreeWidgetItem({text});
     newItem->setBackgroundColor(0, color);
+    newItem->setToolTip(0, text);
     item->addChild(newItem);
 
     if(!step.entry.isNull()) {
