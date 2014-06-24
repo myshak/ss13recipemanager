@@ -915,6 +915,7 @@ void MainWindow::on_actionAbout_Recipe_Manager_triggered()
 {
 
     QMessageBox::about(this, tr("About Recipe Manager"), trUtf8("Recipe Manager\n© 2013-2014 by mysha (mysha@mysha.cu.cc)\n"
+                                                            "Version " VERSION_STRING "\n"
                                                             "\n"
                                                             "Donations in bitcoins are appreciated.\n\n"
                                                             "BTC donation address: %0").arg("1Gzk3F4C4FiMVjTHCCkRuRwqZoCKujtBXd"));
