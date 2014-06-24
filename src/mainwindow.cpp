@@ -834,7 +834,7 @@ void MainWindow::load_settings()
     restoreState(getSetting<QByteArray>("General/windowState"));
 
     indentation_level = getSetting<int>("General/indentation_level", 3);
-    tree_animated = getSetting<bool>("General/tree_animated", false);
+    tree_animated = getSetting<bool>("General/tree_animated", true);
     // QVariant.value<enum type>() doesn't seem to work. Cast it from int manually
     directions_style = static_cast<DirectionsStyle>(getSetting<quint32>("General/directions_style", DirectionsStyle::Normal));
 }
