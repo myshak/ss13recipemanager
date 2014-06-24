@@ -830,14 +830,13 @@ void MainWindow::reagentlist_select(const QString &reagent, const QModelIndex& m
 
 void MainWindow::load_settings()
 {
-    restoreGeometry(getSetting<QByteArray>("general/geometry"));
-    restoreState(getSetting<QByteArray>("general/windowState"));
+    restoreGeometry(getSetting<QByteArray>("General/geometry"));
+    restoreState(getSetting<QByteArray>("General/windowState"));
 
-    indentation_level = getSetting<int>("general/indentation_level", 3);
-    tree_animated = getSetting<bool>("general/tree_animated", false);
+    indentation_level = getSetting<int>("General/indentation_level", 3);
+    tree_animated = getSetting<bool>("General/tree_animated", false);
     // QVariant.value<enum type>() doesn't seem to work. Cast it from int manually
-    directions_style = static_cast<DirectionsStyle>(getSetting<quint32>("general/directions_style", DirectionsStyle::Normal));
-
+    directions_style = static_cast<DirectionsStyle>(getSetting<quint32>("General/directions_style", DirectionsStyle::Normal));
 }
 
 void MainWindow::save_settings()
@@ -851,9 +850,9 @@ void MainWindow::save_settings()
     }
     settings.endArray();
 
-    settings.setValue("general/indentation_level", indentation_level);
-    settings.setValue("general/directions_style", directions_style);
-    settings.setValue("general/tree_animated", tree_animated);
+    settings.setValue("General/indentation_level", indentation_level);
+    settings.setValue("General/directions_style", directions_style);
+    settings.setValue("General/tree_animated", tree_animated);
 
     settings.sync();
 
@@ -863,16 +862,16 @@ void MainWindow::save_settings()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    setSetting("general/geometry", saveGeometry());
-    setSetting("general/windowState", saveState());
+    setSetting("General/geometry", saveGeometry());
+    setSetting("General/windowState", saveState());
 
     if (settings_changed) {
         QMessageBox::StandardButton save;
         save = QMessageBox::question(this, tr("Save before quitting?"), tr("Do you want to save modified settings before exiting?"),QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
         if(save == QMessageBox::Yes) {
             save_settings();
-            setSetting("general/geometry", saveGeometry());
-            setSetting("general/windowState", saveState());
+            setSetting("General/geometry", saveGeometry());
+            setSetting("General/windowState", saveState());
             event->accept();
         } else if (save == QMessageBox::Cancel) {
             event->ignore();
