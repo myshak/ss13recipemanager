@@ -533,12 +533,14 @@ MainWindow::ReactionStep MainWindow::gather_reactions(Reagent reagent)
     return step;
 }
 
-void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int current_depth)
+void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, bool sort, int current_depth)
 {
     if(directions_style == DirectionsStyle::Normal) {
         if(!step.entry.isNull()) {
             auto steps = step.entry.value<QList<ReactionStep>>();
-            qStableSort(steps.begin(),steps.end(), ReactionListGreaterThan);
+            if(sort) {
+                qStableSort(steps.begin(),steps.end(), ReactionListGreaterThan);
+            }
 
             for(auto i: steps) {
                 fill_directions(table, i, current_depth + 1);
@@ -574,7 +576,9 @@ void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int cur
     if(directions_style == DirectionsStyle::Inverted) {
         if(!step.entry.isNull()) {
             auto steps = step.entry.value<QList<ReactionStep>>();
-            qStableSort(steps.begin(),steps.end(), ReactionListLessThan);
+            if(sort) {
+                qStableSort(steps.begin(),steps.end(), ReactionListLessThan);
+            }
             for(auto i: steps) {
                 fill_directions(table, i, current_depth + 1);
             }
@@ -583,7 +587,7 @@ void MainWindow::fill_directions(QTableWidget* table, ReactionStep step, int cur
 
 }
 
-void MainWindow::fill_directions(QTreeWidgetItem* item, ReactionStep step, int current_depth)
+void MainWindow::fill_directions(QTreeWidgetItem* item, ReactionStep step, bool sort, int current_depth)
 {
     QColor color = StepColors[step.type];
     QString text;
@@ -608,7 +612,9 @@ void MainWindow::fill_directions(QTreeWidgetItem* item, ReactionStep step, int c
 
     if(!step.entry.isNull()) {
         auto steps = step.entry.value<QList<ReactionStep>>();
-        qStableSort(steps.begin(),steps.end(), ReactionListGreaterThan);
+        if(sort) {
+            qStableSort(steps.begin(),steps.end(), ReactionListGreaterThan);
+        }
         for(auto i: steps) {
             fill_directions(newItem, i, current_depth + 1);
         }
@@ -643,7 +649,11 @@ QWidget *MainWindow::create_table_directions(const Reagent* reagent, QWidget* pa
     directions_table->setCornerButtonEnabled(false);
 
     auto reaction_list = gather_reactions(*reagent);
-    fill_directions(directions_table, reaction_list);
+    bool sort = true;
+    if(reagent->properties.contains("unsorted") && reagent->properties["unsorted"].toBool() == true) {
+        sort = false;
+    }
+    fill_directions(directions_table, reaction_list, sort);
 
     connect(directions_table->horizontalHeader(), SIGNAL(sectionResized(int, int, int)), directions_table, SLOT(resizeRowsToContents()));
     connect(directions_table->horizontalHeader(), SIGNAL(geometriesChanged()), directions_table, SLOT(resizeRowsToContents()));
@@ -671,7 +681,11 @@ QWidget *MainWindow::create_tree_directions(const Reagent* reagent, QWidget* par
     directions_tree->setWordWrap(true);
 
     auto reaction_list = gather_reactions(*reagent);
-    fill_directions(directions_tree->invisibleRootItem(), reaction_list);
+    bool sort = true;
+    if(reagent->properties.contains("unsorted") && reagent->properties["unsorted"].toBool() == true) {
+        sort = false;
+    }
+    fill_directions(directions_tree->invisibleRootItem(), reaction_list, sort);
 
     directions_tree->expandAll();
 

@@ -133,8 +133,8 @@ private:
     QWidget *create_sources_tab(const Reagent *reagent);
 
     ReactionStep gather_reactions(Reagent reagent);
-    void fill_directions(QTableWidget *table, ReactionStep step, int current_depth = 0);
-    void fill_directions(QTreeWidgetItem* item, ReactionStep step, int current_depth = 0);
+    void fill_directions(QTableWidget *table, ReactionStep step, bool sort, int current_depth = 0);
+    void fill_directions(QTreeWidgetItem* item, ReactionStep step, bool sort, int current_depth = 0);
 };
 
 Q_DECLARE_METATYPE(QList<MainWindow::ReactionStep>)
