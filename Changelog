@@ -1,3 +1,17 @@
+v1.7
+ - Added a new option for recipes: 'unsorted' [true,false].
+   When present and set to true, the recipe ingredients won't be
+   sorted according to their complexity, just displayed as ordered
+   in the ingredient list
+ - Added support for custom styling. Just put a style.qss containing
+   valid Qt QSS stylesheet in the directory with the executable
+ - Added tooltips to the directions tab for steps and ingredients to
+   remedy the problem with text being cut off sometimes
+ - Added the source recipe list in the info tab of reagents
+ * Changed the tag cloud scaling from linear to logarythmic, to prevent
+   the 'food' tag from dominating
+ * Enabled the tree-style directions tab animations by default
+
 v1.6
  - Added a tree style directions tab
  - Updated the heat/reaction message labels

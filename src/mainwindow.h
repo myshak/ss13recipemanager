@@ -14,7 +14,7 @@
 #include "recipelistproxymodel.h"
 
 #define SETTINGS_FILENAME "recipemanager.ini"
-#define VERSION_STRING "1.6"
+#define VERSION_STRING "1.7"
 
 namespace Ui {
 class MainWindow;
