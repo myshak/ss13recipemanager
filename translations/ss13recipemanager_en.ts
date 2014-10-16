@@ -26,7 +26,7 @@
     <message>
         <location filename="../src/mainwindow.cpp" line="33"/>
         <source>overdose_threshold</source>
-        <translation>Overdose treshold</translation>
+        <translation>Overdose threshold</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.cpp" line="34"/>
